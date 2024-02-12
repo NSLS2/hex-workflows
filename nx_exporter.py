@@ -30,7 +30,7 @@ def export(ref, det_name="GeRM"):
     # Get the BlueskyRun from Tiled.
     run = tiled_client_hex[ref]
 
-    nx_file_path = nx_export(run)
+    nx_file_path = nx_export(run, det_name)
     logger.info(f"Exported file: {nx_file_path}")
     return nx_file_path
 
