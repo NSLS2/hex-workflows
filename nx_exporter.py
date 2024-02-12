@@ -22,8 +22,8 @@ def export(ref, det_name="GeRM"):
 
     Returns
     -------
-    dataset_uid: string
-        The uid of the resulting dataset.
+    nx_file_path : string
+        The path to the exported file.
     """
     logger = get_run_logger()
 
