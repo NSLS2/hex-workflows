@@ -16,7 +16,7 @@ push:
 pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NSLS-II-HEX/workflows
-    branch: main
+    branch: nx-exporter
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
@@ -42,3 +42,15 @@ deployments:
     work_queue_name:
     job_variables: {}
   schedule:
+- name: hex-export
+  version:
+  tags: []
+  description:
+  entrypoint: nx_exporter.py:export_flow
+  parameters: {}
+  work_pool:
+    name: hex-agent-pool
+    work_queue_name:
+    job_variables: {}
+  schedule:
+  is_schedule_active: true
