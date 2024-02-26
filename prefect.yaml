@@ -22,7 +22,8 @@ pull:
 deployments:
 - name: hex-end-of-run-workflow
   version:
-  tags: ["hex"]
+  tags:
+  - hex
   description:
   entrypoint: end_of_run_workflow.py:end_of_run_workflow
   parameters: {}
@@ -31,9 +32,10 @@ deployments:
     work_queue_name:
     job_variables: {}
   schedule:
+  is_schedule_active: true
 - name: hex-data-validation
   version:
-  tags: ["hex"]
+  tags: [hex]
   description:
   entrypoint: data_validation.py:data_validation
   parameters: {}
@@ -42,3 +44,15 @@ deployments:
     work_queue_name:
     job_variables: {}
   schedule:
+- name: hex-export
+  version:
+  tags: []
+  description:
+  entrypoint: nx_exporter.py:export_flow
+  parameters: {}
+  work_pool:
+    name: hex-agent-pool
+    work_queue_name:
+    job_variables: {}
+  schedule:
+  is_schedule_active: true
