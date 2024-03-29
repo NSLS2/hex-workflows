@@ -1,7 +1,8 @@
 import os
-from prefect import task, flow, get_run_logger
 import time as ttime
-from tiled.client import from_profile
+
+from prefect import flow, get_run_logger, task
+from tiled.client import from_profile, from_uri
 
 
 @task(retries=2, retry_delay_seconds=10)
@@ -30,4 +31,3 @@ def read_all_streams(uid, beamline_acronym):
 @flow
 def data_validation(uid):
     read_all_streams(uid, beamline_acronym="hex")
-
