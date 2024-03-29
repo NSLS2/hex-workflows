@@ -33,10 +33,11 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
     date = datetime.datetime.fromtimestamp(start_doc["time"])
 
     if export_dir is None:
-        export_dir = "/nsls2/data/hex/legacy/flyscan_tests/just_kinetix"
+        # export_dir = "/nsls2/data/hex/legacy/flyscan_tests/just_kinetix"
+        export_dir = "/nsls2/data/hex/proposals/commissioning/pass-315051/tomography/bluesky_test/exported"
 
     if file_prefix is None:
-        file_prefix = "scan_{start[uid]}_{date.year:04d}-{date.month:02d}-{date.day:02d}-{counter:03d}.nxs"
+        file_prefix = "{start[plan_name]}_{start[scan_id]}_{date.year:04d}-{date.month:02d}-{date.day:02d}-{counter:03d}.nxs"
 
     rendered_file_name = file_prefix.format(start=start_doc, date=date, counter=counter)
 
@@ -74,8 +75,12 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
         #         current_metadata_grp.create_dataset(key, data=value, dtype=dtype)
 
         # External links:
-        data_grp["data"] = h5py.ExternalLink(rel_det_filepath.as_posix(), "entry/data/data")
-        data_grp["rotation_angle"] = h5py.ExternalLink(rel_panda_filepath.as_posix(), "CALC2.OUT.Value")
+        data_grp["data"] = h5py.ExternalLink(
+            rel_det_filepath.as_posix(), "entry/data/data"
+        )
+        data_grp["rotation_angle"] = h5py.ExternalLink(
+            rel_panda_filepath.as_posix(), "CALC2.OUT.Value"
+        )
 
         # data = run.primary["data"][f"{det_name}_image"].read()
         # frame_shape = data.shape[1:]
@@ -90,14 +95,21 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
 
 
 if __name__ == "__main__":
-
     tiled_client = from_uri(
         "http://localhost:8000",
         api_key=os.getenv("TILED_API_KEY", ""),
         include_data_sources=True,
     )
 
-    uid = "27d30985-ca8b-46c9-93fd-64ffa7e88ac2"
+    # uid = "27d30985-ca8b-46c9-93fd-64ffa7e88ac2"
+
+    # Saved in legacy:
+    # uid = "a6dc898f-5087-4ae5-863b-5c9f8ae6d0ac"  # run on 2024-03-28 at ~6:30 pm, 360 deg scan, 1801 frames
+    # uid = "01babb57-30b6-40f9-a115-daed23e8cfea"  # run on 2024-03-28 at ~8:00 pm, 360 deg scan, 3601 frames
+
+    # Saved in assets:
+    uid = "a1451ea2-55c5-4d45-a4c1-efc0872e4355"  # run on 2024-03-28 at ~8:10 pm, 180 deg scan, 1801 frames
+
     run = tiled_client[uid]
 
     nx_filepath = export_tomo(run, export_dir=None, file_prefix=None, counter=0)
