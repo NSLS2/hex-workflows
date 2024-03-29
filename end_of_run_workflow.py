@@ -1,6 +1,6 @@
 from prefect import task, flow, get_run_logger
 from data_validation import data_validation
-from nx_exporter import export_flow
+from nx_exporter_edxd import export_flow
 
 
 @task

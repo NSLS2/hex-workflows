@@ -4,7 +4,8 @@ from pathlib import Path
 
 import h5py
 import numpy as np
-from tiled.client import from_uri
+from prefect import flow, get_run_logger, task
+from tiled.client import from_profile, from_uri
 from tiled.client.utils import get_asset_filepaths
 
 
@@ -27,8 +28,9 @@ def get_dtype(value):
     return type(value)
 
 
-def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
-    """Function to export bluesky run to NeXus file
+@task
+def export_tomo(run, export_dir=None, file_prefix=None, counter=1):
+    """Function to export bluesky run to a NeXus file.
 
     Parameters:
     -----------
@@ -38,6 +40,8 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
         the export directory for the resulting file.
     file_prefix : str (optional)
         the file prefix template for the resulting file.
+    counter : int (optional)
+        a counter to add to the file name.
     """
     start_doc = run.metadata["start"]
     date = datetime.datetime.fromtimestamp(start_doc["time"])
@@ -97,24 +101,39 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
     return nx_filepath
 
 
-if __name__ == "__main__":
-    tiled_client = from_uri(
-        "http://localhost:8000",
-        api_key=os.getenv("TILED_API_KEY", ""),
-        include_data_sources=True,
-    )
+@flow(log_prints=True)
+def export_tomo_flow(ref):
+    uid = ref
+    logger = get_run_logger()
+    tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
+    if tiled_server_type == "facility":
+        tiled_client = from_profile("nsls2")
+        run = tiled_client["hex"]["raw"][uid]
+    elif tiled_server_type == "local":
+        tiled_client = from_uri("http://localhost:8000")
+        run = tiled_client[uid]
 
-    # uid = "27d30985-ca8b-46c9-93fd-64ffa7e88ac2"
+    fp = export_tomo(run)
 
-    # Saved in legacy:
-    # uid = "a6dc898f-5087-4ae5-863b-5c9f8ae6d0ac"  # run on 2024-03-28 at ~6:30 pm, 360 deg scan, 1801 frames
-    # uid = "01babb57-30b6-40f9-a115-daed23e8cfea"  # run on 2024-03-28 at ~8:00 pm, 360 deg scan, 3601 frames
 
-    # Saved in proposals:
-    # uid = "a1451ea2-55c5-4d45-a4c1-efc0872e4355"  # run on 2024-03-28 at ~8:10 pm, 180 deg scan, 1801 frames
-    uid = "db2182bd-f6e9-41f4-ae3f-b4e8bd594eb0"  # run on 2024-03-29 at ~8:00 am, 360 deg scan, 3601 frames
-
-    run = tiled_client[uid]
-
-    nx_filepath = export_tomo(run, export_dir=None, file_prefix=None, counter=0)
-    print(f"{nx_filepath = }")
+# if __name__ == "__main__":
+#     tiled_client = from_uri(
+#         "http://localhost:8000",
+#         api_key=os.getenv("TILED_API_KEY", ""),
+#         include_data_sources=True,
+#     )
+#
+#     # uid = "27d30985-ca8b-46c9-93fd-64ffa7e88ac2"
+#
+#     # Saved in legacy:
+#     # uid = "a6dc898f-5087-4ae5-863b-5c9f8ae6d0ac"  # run on 2024-03-28 at ~6:30 pm, 360 deg scan, 1801 frames
+#     # uid = "01babb57-30b6-40f9-a115-daed23e8cfea"  # run on 2024-03-28 at ~8:00 pm, 360 deg scan, 3601 frames
+#
+#     # Saved in proposals:
+#     # uid = "a1451ea2-55c5-4d45-a4c1-efc0872e4355"  # run on 2024-03-28 at ~8:10 pm, 180 deg scan, 1801 frames
+#     uid = "db2182bd-f6e9-41f4-ae3f-b4e8bd594eb0"  # run on 2024-03-29 at ~8:00 am, 360 deg scan, 3601 frames
+#
+#     run = tiled_client[uid]
+#
+#     nx_filepath = export_tomo(run, export_dir=None, file_prefix=None, counter=0)
+#     print(f"{nx_filepath = }")
