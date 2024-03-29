@@ -29,7 +29,7 @@ def get_dtype(value):
 
 
 @task
-def export_tomo(run, export_dir=None, file_prefix=None, counter=1):
+def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
     """Function to export bluesky run to a NeXus file.
 
     Parameters:
