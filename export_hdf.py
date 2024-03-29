@@ -9,12 +9,22 @@ from tiled.client.utils import get_asset_filepaths
 
 
 def get_filepath_from_run(run, stream_name):
-    entry = getattr(run, stream_name)["external"].values().last()
+    entry = run[stream_name]["external"].values().last()
     filepath = get_asset_filepaths(entry)[0]
     if not filepath.is_file():
         msg = f"{filepath!r} does not exist!"
         raise RuntimeError(msg)
     return filepath
+
+
+def get_dtype(value):
+    if isinstance(value, str):
+        return h5py.special_dtype(vlen=str)
+    if isinstance(value, float):
+        return np.float32
+    if isinstance(value, int):
+        return np.int32
+    return type(value)
 
 
 def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
@@ -29,7 +39,7 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
     file_prefix : str (optional)
         the file prefix template for the resulting file.
     """
-    start_doc = run.start
+    start_doc = run.metadata["start"]
     date = datetime.datetime.fromtimestamp(start_doc["time"])
 
     if export_dir is None:
@@ -43,15 +53,6 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
 
     nx_filepath = Path(export_dir) / Path(rendered_file_name)
     print(f"{nx_filepath = }")
-
-    def get_dtype(value):
-        if isinstance(value, str):
-            return h5py.special_dtype(vlen=str)
-        if isinstance(value, float):
-            return np.float32
-        if isinstance(value, int):
-            return np.int32
-        return type(value)
 
     det_filepath = get_filepath_from_run(run, "kinetix_standard_det_stream")
     panda_filepath = get_filepath_from_run(run, "panda_standard_det_stream")
@@ -76,10 +77,12 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
 
         # External links:
         data_grp["data"] = h5py.ExternalLink(
-            rel_det_filepath.as_posix(), "entry/data/data"
+            os.path.join("..", rel_det_filepath.as_posix()),
+            "entry/data/data",
         )
         data_grp["rotation_angle"] = h5py.ExternalLink(
-            rel_panda_filepath.as_posix(), "CALC2.OUT.Value"
+            os.path.join("..", rel_panda_filepath.as_posix()),
+            "CALC2.OUT.Value",
         )
 
         # data = run.primary["data"][f"{det_name}_image"].read()
