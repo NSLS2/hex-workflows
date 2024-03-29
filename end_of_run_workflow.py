@@ -16,5 +16,6 @@ def end_of_run_workflow(stop_doc):
     uid = stop_doc["run_start"]
     # export_edxd_flow(uid)
     export_tomo_flow(uid)
-    data_validation(uid)
+    # TODO: revert it after switching back from local tiled to the facility one:
+    # data_validation(uid)
     log_completion()
