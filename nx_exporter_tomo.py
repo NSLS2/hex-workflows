@@ -43,26 +43,27 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
     counter : int (optional)
         a counter to add to the file name.
     """
-    start_doc = run.metadata["start"]
-    date = datetime.datetime.fromtimestamp(start_doc["time"])
-
-    if export_dir is None:
-        # export_dir = "/nsls2/data/hex/legacy/flyscan_tests/just_kinetix"
-        export_dir = "/nsls2/data/hex/proposals/commissioning/pass-315051/tomography/bluesky_test/exported"
-
-    if file_prefix is None:
-        file_prefix = "{start[plan_name]}_{start[scan_id]}_{date.year:04d}-{date.month:02d}-{date.day:02d}-{counter:03d}.nxs"
-
-    rendered_file_name = file_prefix.format(start=start_doc, date=date, counter=counter)
-
-    nx_filepath = Path(export_dir) / Path(rendered_file_name)
-    print(f"{nx_filepath = }")
 
     det_filepath = get_filepath_from_run(run, "kinetix_standard_det_stream")
     panda_filepath = get_filepath_from_run(run, "panda_standard_det_stream")
     print(f"{det_filepath = !r}\n{panda_filepath = !r}")
 
-    common_parent_dir = os.path.commonprefix([export_dir, det_filepath, panda_filepath])
+    common_parent_dir = os.path.commonprefix([det_filepath, panda_filepath])
+    print(f"{common_parent_dir = !r}")
+
+    start_doc = run.metadata["start"]
+    date = datetime.datetime.fromtimestamp(start_doc["time"])
+
+    if export_dir is None:
+        export_dir = common_parent_dir
+
+    if file_prefix is None:
+        file_prefix = "{start[plan_name]}_{start[scan_id]}_{date.year:04d}-{date.month:02d}-{date.day:02d}.nxs"
+
+    rendered_file_name = file_prefix.format(start=start_doc, date=date, counter=counter)
+
+    nx_filepath = Path(export_dir) / Path(rendered_file_name)
+    print(f"{nx_filepath = }")
 
     # rel_nx = nx_filepath.relative_to(common_parent_dir)
     rel_det_filepath = det_filepath.relative_to(common_parent_dir)
