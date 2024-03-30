@@ -82,11 +82,11 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
 
         # External links:
         data_grp["data"] = h5py.ExternalLink(
-            os.path.join("..", rel_det_filepath.as_posix()),
+            rel_det_filepath.as_posix(),
             "entry/data/data",
         )
         data_grp["rotation_angle"] = h5py.ExternalLink(
-            os.path.join("..", rel_panda_filepath.as_posix()),
+            rel_panda_filepath.as_posix(),
             "CALC2.OUT.Value",
         )
 
