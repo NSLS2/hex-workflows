@@ -38,7 +38,7 @@ def export(ref, det_name="GeRM"):
 # Make the Prefect Flow.
 # A separate command is needed to register it with the Prefect server.
 @flow
-def export_flow(ref, det_name="GeRM"):
+def export_edxd_flow(ref, det_name="GeRM"):
     logger = get_run_logger()
     logger.info(f"tiled: {tiled.__version__}")
     logger.info(f"profiles: {tiled.profiles.list_profiles()['nsls2']}")
