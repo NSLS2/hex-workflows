@@ -30,7 +30,12 @@ def export(ref, det_name="GeRM"):
     # Get the BlueskyRun from Tiled.
     run = tiled_client_hex[ref]
 
-    nx_file_path = nx_export(run, det_name)
+    if run["start"].get("theta") is not None:
+        file_prefix = None
+    else:
+        file_prefix = "scan_{start[scan_id]:05d}_{start[calibrant]}_{date.month:02d}_{date.day:02d}_{date.year:04d}.nxs"
+
+    nx_file_path = nx_export(run, det_name, file_prefix=file_prefix)
     logger.info(f"Exported file: {nx_file_path}")
     return nx_file_path
 
