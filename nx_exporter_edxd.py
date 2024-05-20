@@ -43,8 +43,7 @@ def export(ref, det_name="GeRM"):
     if start_doc.get("export_dir") is not None:
         export_dir = None
     else:
-        export_dir = f"/nsls2/data/hex/proposals/comissioning/{start_doc.get('data_session')}/exported_data/"
-        # export_dir = f"/nsls2/data/hex/proposals/start_doc.get('cycle')/{start_doc.get('data_session')}/exported_data/"
+        export_dir = f"/nsls2/data/hex/proposals/{start_doc.get('cycle')}/{start_doc.get('data_session')}/exported_data/"
 
     nx_file_path = nx_export(run, det_name, file_prefix=file_prefix, export_dir=export_dir)
     logger.info(f"Exported file: {nx_file_path}")
