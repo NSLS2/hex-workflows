@@ -35,7 +35,7 @@ def export(ref, det_name="GeRM"):
     if start_doc.get("theta") is not None:
         file_prefix = None
     else:
-        file_prefix = "scan_{start[scan_id]:05d}_{start[calibrant]}_{date.month:02d}_{date.day:02d}_{date.year:04d}.nxs"
+        file_prefix = "scan_{start[scan_id]:05d}_{date.month:02d}_{date.day:02d}_{date.year:04d}.nxs"
 
     # TODO: commissioning may need to be replaced by cycle after testing
     # /nsls2/data/hex/proposals/commissioning/pass-315258/exported_data/
