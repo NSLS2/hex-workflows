@@ -31,9 +31,11 @@ def get_filepath_from_run(run, stream_name):
 
 
 def get_det_link_filepath(start_doc):
-    det_link_filepath = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/raw_data/scan_{start_doc['scan_id']:05d}/scan_{start_doc['scan_id']:05d}_{start_doc['uid']}.h5"
+    det_link_filepath = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/raw_data/scan_{start_doc['scan_id']:05d}/"
     Path(det_link_filepath).mkdir(parents=True, exist_ok=True)
-    return det_link_filepath
+    det_link_filename = f"scan_{start_doc['scan_id']:05d}_{start_doc['uid']}.h5"
+    full_det_filename = det_link_filepath + det_link_filename
+    return full_det_filename
 
 
 @task
