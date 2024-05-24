@@ -1,6 +1,7 @@
 import datetime
 import os
 from pathlib import Path
+from shutil import copy2
 
 import h5py
 import numpy as np
@@ -30,22 +31,26 @@ def get_filepath_from_run(run, stream_name):
     return filepath
 
 
-def get_det_link_filepath(start_doc):
-    det_link_filepath = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/raw_data/scan_{start_doc['scan_id']:05d}/"
-    Path(det_link_filepath).mkdir(parents=True, exist_ok=True)
-    det_link_filename = f"scan_{start_doc['scan_id']:05d}_{start_doc['uid']}.h5"
-    full_det_filename = det_link_filepath + det_link_filename
+def get_det_copy_filepath(start_doc):
+    det_copy_filepath = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/raw_data/scan_{start_doc['scan_id']:05d}/"
+    Path(det_copy_filepath).mkdir(parents=True, exist_ok=True)
+    det_copy_filename = f"scan_{start_doc['scan_id']:05d}_{start_doc['uid']}.h5"
+    full_det_filename = det_copy_filepath + det_copy_filename
     return full_det_filename
 
 
 @task
-def create_germ_hard_link(run):
+def copy_file(run):
     start_doc = run.metadata["start"]
-    det_filepath = get_filepath_from_run(run, "primary")
-    print(f"{det_filepath = }")
-    det_link_filename = get_det_link_filepath(start_doc)
-    os.link(det_filepath, det_link_filename)
-    return det_link_filename
+    # Get det data file in assets dir
+    source = get_filepath_from_run(run, "primary")
+    print(f"{source = }")
+    # Get destination dir in proposal dir
+    dest = get_det_copy_filepath(start_doc)
+    print(f"Copying {source} to {dest}")
+    copy2(source, dest)
+    print("Done copying file")
+    return dest
 
 
 def get_detector_parameters_from_tiled(run, det_name=None, keys=None):
@@ -84,7 +89,7 @@ def get_detector_parameters_from_tiled(run, det_name=None, keys=None):
 
 
 @task
-def create_combined_file(run, det_name, det_link_file):
+def create_combined_file(run, det_name, copied_det_file):
     start_doc = run.start
     export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/raw_data/scan_{start_doc['scan_id']:05d}/"
     date = datetime.datetime.fromtimestamp(start_doc["time"])
@@ -121,14 +126,14 @@ def create_combined_file(run, det_name, det_link_file):
                 current_metadata_grp.create_dataset(key, data=value, dtype=dtype)
 
         # External link
-        data_grp["data"] = h5py.ExternalLink(det_link_file, "entry/data/data")
+        data_grp["data"] = h5py.ExternalLink(copied_det_file, "entry/data/data")
 
 
 @flow
 def export_edxd_flow(ref):
     print(f"tiled: {tiled.__version__}")
     run = tiled_client_hex[ref]
-    det_link_filename = create_germ_hard_link(run)
-    print(f"{det_link_filename = }")
-    create_combined_file(run, det_name="GeRM", det_link_file=det_link_filename)
+    copied_det_filename = copy_file(run)
+    print(f"{copied_det_filename = }")
+    create_combined_file(run, det_name="GeRM", copied_det_file=copied_det_filename)
     print("Done!")
