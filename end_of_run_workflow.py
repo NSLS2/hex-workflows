@@ -24,8 +24,9 @@ def end_of_run_workflow(stop_doc):
 
     # if "germ" in [det.lower() for det in run.metadata['start']["detectors"]]:
     #     export_edxd_flow(uid)
-    if start_doc["plan_name"] in ["sweep_motion"]:
-        export_edxd_flow(uid)
+    # uncomment after testing
+    # if start_doc["plan_name"] in ["sweep_motion"]:
+    export_edxd_flow(uid)
 
     data_validation(uid)
     log_completion()
