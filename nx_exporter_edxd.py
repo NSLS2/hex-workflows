@@ -21,6 +21,21 @@ GERM_DETECTOR_KEYS = [
     "voltage",
 ]
 
+# motor info
+# In [25]: [*run['baseline']['config']]
+# Out[25]: ['kinetix-det1-drv-acquire_time',
+#  'mca1_motors_fltr1d',  # Filter_1_Downstream
+#  'mca1_motors_fltr3',  # Filter_3
+#  'mca1_motors_fltr1u',  # Filter_1_Upstream
+#  'mca1_motors_fltr2',  # Filter_2
+#  'mca1_motors_slitb',  # Bottom
+#  'mca1_motors_sliti',  # Inboard
+#  'mca1_motors_slito',  # Outboard
+#  'mca1_motors_slitt']  # Top
+
+# In [15]: run.baseline['config']['mca1_motors_slito']['mca1_motors_slito'][:][0]
+# Out[15]: 2.0001
+
 
 def get_filepath_from_run(run, stream_name):
     entry = run[stream_name]["external"].values().last()
@@ -88,6 +103,19 @@ def get_detector_parameters_from_tiled(run, det_name=None, keys=None):
     return detector_metadata
 
 
+def get_motor_metadata(run):
+    all_motors = {*()}
+    for k in sorted(run.baseline['config']):
+        if 'motor' in k:
+           all_motors.add(k.split("_")[0])
+    nested_motor_metadata = {motor_name: {} for motor_name in all_motors}
+    for k in sorted(run.baseline['config']):
+        if 'motor' in k:
+            motor_name = k.split("_")[0]
+            nested_motor_metadata[motor_name][k] = run.baseline['config'][k][k][:][0]
+
+    return nested_motor_metadata
+
 @task
 def create_combined_file(run, det_name, copied_det_file):
     start_doc = run.start
@@ -127,6 +155,27 @@ def create_combined_file(run, det_name, copied_det_file):
 
         # External link
         data_grp["data"] = h5py.ExternalLink(copied_det_file, "entry/data/data")
+
+        # static_motors group
+        # static_motors_grp = h5_file.require_group("entry/static_motors")
+        # motor_meta_dict = get_motor_metadata(run)
+        # for key, value in motor_meta_dict.items():
+        #     curr_motor_grp = h5_file.require_group(f"entry/static_motors/{key.split('_')[0]}")
+        #     if key not in curr_motor_grp:
+        #         dtype = get_dtype(value)
+        #         # if need to update key names, do in line below?
+        #         curr_motor_grp.create_dataset(key, data=value, dtype=dtype)
+
+        # static_motors group
+        static_motors_grp = h5_file.require_group("entry/static_motors")
+        motor_meta_dict = get_motor_metadata(run)
+        for motor_name, values in motor_meta_dict.items():
+            curr_motor_grp = h5_file.require_group(f"entry/static_motors/{motor_name}")
+            for field, value in values.items():
+                if field not in curr_motor_grp:
+                    dtype = get_dtype(value)
+                    # if need to update key names, do in line below?
+                    curr_motor_grp.create_dataset(field, data=value, dtype=dtype)
 
 
 @flow
