@@ -87,7 +87,7 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
         )
         data_grp["rotation_angle"] = h5py.ExternalLink(
             rel_panda_filepath.as_posix(),
-            "CALC2.OUT.Value",
+            "Angle",
         )
 
         # data = run.primary["data"][f"{det_name}_image"].read()
