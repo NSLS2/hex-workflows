@@ -44,8 +44,8 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
         a counter to add to the file name.
     """
 
-    det_filepath = get_filepath_from_run(run, "kinetix_standard_det_stream")
-    panda_filepath = get_filepath_from_run(run, "panda_standard_det_stream")
+    det_filepath = get_filepath_from_run(run, "kinetix-det1_stream")
+    panda_filepath = get_filepath_from_run(run, "panda1_stream")
     print(f"{det_filepath = !r}\n{panda_filepath = !r}")
 
     common_parent_dir = os.path.commonprefix([det_filepath, panda_filepath])
