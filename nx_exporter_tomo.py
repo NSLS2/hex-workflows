@@ -63,14 +63,26 @@ def export_tomo(run, export_dir=None):
 
     # need relative path of export_dir and panda_filepath for ExternalLink
     common_parent_dir = os.path.commonprefix([export_dir, panda_filepath])
-    print(f"{common_parent_dir}")
+    print(f"{common_parent_dir = }")
+
+    rel_panda_filepath = Path(panda_filepath).relative_to(common_parent_dir)
+    rel_det_filepaths = {}
+    for stream_name, det_filepath in det_filepaths.items():
+        rel_det_filepaths[stream_name] = Path(det_filepath).relative_to(common_parent_dir)
+
+    print(f"{rel_panda_filepath = }")
+    print(f"{rel_det_filepaths = }")
 
     filename = f"scan_{start_doc['scan_id']:05d}.nxs"
 
     nx_filepath = Path(export_dir) / Path(filename)
     print(f"{nx_filepath = }")
 
-    with h5py.File(nx_filepath, "x") as h5_file:
+    if os.path.exists(nx_filepath):
+        raise FileExistsError(f"{nx_filepath} exists. Not overwriting it")
+
+    # Need 'a' instead of 'x' mode in order to change external link mode
+    with h5py.File(nx_filepath, "a") as h5_file:
         entry_grp = h5_file.require_group("entry")
         data_grp = entry_grp.require_group("data")
 
@@ -83,21 +95,22 @@ def export_tomo(run, export_dir=None):
 
         # External links:
         # multiple kinetix dets - entry/data/data becomes entry/data/kinetix-det1, entry/data/kinetix-det2, etc.
-        if len(det_filepaths) > 1:
-            for stream_name, det_filepath in det_filepaths.items():
+        if len(rel_det_filepath) > 1:
+            for stream_name, rel_det_filepath in rel_det_filepaths.items():
                 nxs_data_name = stream_name.split("_")[0]
                 data_grp[nxs_data_name] = h5py.ExternalLink(
-                    det_filepath.as_posix(),
-                    f"entry/data/{nxs_data_name}"
+                    rel_det_filepath.as_posix(),
+                    f"entry/data/data"
                 )
+                data_grp.move("data", f"entry/data/{nxs_data_name}")
         else:
-            for stream_name, det_filepath in det_filepaths.items():
+            for stream_name, rel_det_filepath in rel_det_filepaths.items():
                 data_grp["data"] = h5py.ExternalLink(
                     det_filepath.as_posix(),
                     "entry/data/data",
                 )
         data_grp["rotation_angle"] = h5py.ExternalLink(
-            panda_filepath.as_posix(),
+            rel_panda_filepath.as_posix(),
             "Angle",
         )
 
