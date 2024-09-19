@@ -56,6 +56,8 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
 
     if export_dir is None:
         export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/scan_{start_doc['scan_id']:05d}/"
+        # Create scan_00000 folder
+        Path(export_dir).mkdir(parents=True, exist_ok=True)
 
     # if file_prefix is None:
     #     file_prefix = "{start[plan_name]}_{start[scan_id]}_{date.year:04d}-{date.month:02d}-{date.day:02d}.nxs"
