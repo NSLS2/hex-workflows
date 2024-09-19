@@ -1,4 +1,3 @@
-import datetime
 import os
 from pathlib import Path
 
@@ -29,7 +28,7 @@ def get_dtype(value):
 
 
 @task
-def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
+def export_tomo(run, export_dir=None):
     """Function to export bluesky run to a NeXus file.
 
     Parameters:
@@ -44,34 +43,28 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
         a counter to add to the file name.
     """
 
-    det_filepath = get_filepath_from_run(run, "kinetix-det1_stream")
-    panda_filepath = get_filepath_from_run(run, "panda1_stream")
-    print(f"{det_filepath = !r}\n{panda_filepath = !r}")
-
-    common_parent_dir = os.path.commonprefix([det_filepath, panda_filepath])
-    print(f"{common_parent_dir = !r}")
-
     start_doc = run.metadata["start"]
-    date = datetime.datetime.fromtimestamp(start_doc["time"])
+
+    det_filepaths = {}
+    for stream in run:
+        if "panda" in stream:
+            panda_filepath = get_filepath_from_run(run, stream)
+        elif "kinetix" in stream:
+            det_filepaths[stream] = get_filepath_from_run(run, stream)
+
+    # det_filepath = get_filepath_from_run(run, "kinetix-det1_stream")
+    # panda_filepath = get_filepath_from_run(run, "panda1_stream")
+    print(f"{det_filepaths = !r}\n{panda_filepath = !r}")
 
     if export_dir is None:
         export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/scan_{start_doc['scan_id']:05d}/"
         # Create scan_00000 folder
         Path(export_dir).mkdir(parents=True, exist_ok=True)
 
-    # if file_prefix is None:
-    #     file_prefix = "{start[plan_name]}_{start[scan_id]}_{date.year:04d}-{date.month:02d}-{date.day:02d}.nxs"
-
     filename = f"scan_{start_doc['scan_id']:05d}.nxs"
-
-    # rendered_file_name = file_prefix.format(start=start_doc, date=date, counter=counter)
 
     nx_filepath = Path(export_dir) / Path(filename)
     print(f"{nx_filepath = }")
-
-    # rel_nx = nx_filepath.relative_to(common_parent_dir)
-    rel_det_filepath = det_filepath.relative_to(common_parent_dir)
-    rel_panda_filepath = panda_filepath.relative_to(common_parent_dir)
 
     with h5py.File(nx_filepath, "x") as h5_file:
         entry_grp = h5_file.require_group("entry")
@@ -85,10 +78,19 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
         #         current_metadata_grp.create_dataset(key, data=value, dtype=dtype)
 
         # External links:
-        data_grp["data"] = h5py.ExternalLink(
-            det_filepath.as_posix(),
-            "entry/data/data",
-        )
+        # multiple kinetix dets - entry/data/data becomes entry/data/kinetix-det1, entry/data/kinetix-det2, etc.
+        if len(det_filepaths) > 1:
+            for stream_name, det_filepath in det_filepaths.items():
+                nxs_data_name = stream_name.split("_")[0]
+                data_grp[nxs_data_name] = h5py.ExternalLink(
+                    det_filepath.as_posix(),
+                    f"entry/data/{nxs_data_name}"
+                )
+        else:
+            data_grp["data"] = h5py.ExternalLink(
+                det_filepath.as_posix(),
+                "entry/data/data",
+            )
         data_grp["rotation_angle"] = h5py.ExternalLink(
             panda_filepath.as_posix(),
             "Angle",
