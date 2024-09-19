@@ -104,7 +104,7 @@ def export_tomo(run, export_dir=None):
                     det_filepath.as_posix(),
                     f"entry/data/data"
                 )
-                data_grp.move("data", nxs_data_name)
+                # data_grp.move("data", nxs_data_name)
         else:
             for stream_name, det_filepath in det_filepaths.items():
                 data_grp["data"] = h5py.ExternalLink(
