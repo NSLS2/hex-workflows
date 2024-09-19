@@ -65,10 +65,10 @@ def export_tomo(run, export_dir=None):
     common_parent_dir = os.path.commonprefix([export_dir, panda_filepath])
     print(f"{common_parent_dir = }")
 
-    rel_panda_filepath = Path(panda_filepath).relative_to(common_parent_dir)
+    rel_panda_filepath = f"../../{Path(panda_filepath).relative_to(common_parent_dir)}"
     rel_det_filepaths = {}
     for stream_name, det_filepath in det_filepaths.items():
-        rel_det_filepaths[stream_name] = Path(det_filepath).relative_to(common_parent_dir)
+        rel_det_filepaths[stream_name] = f"../../{Path(det_filepath).relative_to(common_parent_dir)}"
 
     print(f"{rel_panda_filepath = }")
     print(f"{rel_det_filepaths = }")
@@ -102,7 +102,7 @@ def export_tomo(run, export_dir=None):
                     rel_det_filepath.as_posix(),
                     f"entry/data/data"
                 )
-                data_grp.move("data", f"entry/data/{nxs_data_name}")
+                data_grp.move("data", nxs_data_name)
         else:
             for stream_name, rel_det_filepath in rel_det_filepaths.items():
                 data_grp["data"] = h5py.ExternalLink(
