@@ -61,6 +61,10 @@ def export_tomo(run, export_dir=None):
         # Create scan_00000 folder
         Path(export_dir).mkdir(parents=True, exist_ok=True)
 
+    # need relative path of export_dir and panda_filepath for ExternalLink
+    common_parent_dir = os.path.commonprefix([export_dir, panda_filepath])
+    print(f"{common_parent_dir}")
+
     filename = f"scan_{start_doc['scan_id']:05d}.nxs"
 
     nx_filepath = Path(export_dir) / Path(filename)
@@ -87,10 +91,11 @@ def export_tomo(run, export_dir=None):
                     f"entry/data/{nxs_data_name}"
                 )
         else:
-            data_grp["data"] = h5py.ExternalLink(
-                det_filepath.as_posix(),
-                "entry/data/data",
-            )
+            for stream_name, det_filepath in det_filepaths.items():
+                data_grp["data"] = h5py.ExternalLink(
+                    det_filepath.as_posix(),
+                    "entry/data/data",
+                )
         data_grp["rotation_angle"] = h5py.ExternalLink(
             panda_filepath.as_posix(),
             "Angle",
