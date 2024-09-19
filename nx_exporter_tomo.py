@@ -95,7 +95,7 @@ def export_tomo(run, export_dir=None):
 
         # External links:
         # multiple kinetix dets - entry/data/data becomes entry/data/kinetix-det1, entry/data/kinetix-det2, etc.
-        if len(rel_det_filepath) > 1:
+        if len(rel_det_filepaths) > 1:
             for stream_name, rel_det_filepath in rel_det_filepaths.items():
                 nxs_data_name = stream_name.split("_")[0]
                 data_grp[nxs_data_name] = h5py.ExternalLink(
