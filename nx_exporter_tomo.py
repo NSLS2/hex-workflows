@@ -49,8 +49,15 @@ def export_tomo(run, export_dir=None):
     for stream in run:
         if "panda" in stream:
             panda_filepath = get_filepath_from_run(run, stream)
+            # Check that panda file exists
+            if not os.path.exists(panda_filepath):
+                raise FileNotFoundError(f"{panda_filepath} does not exists")
         elif "kinetix" in stream:
-            det_filepaths[stream] = get_filepath_from_run(run, stream)
+            det_filepath = get_filepath_from_run(run, stream)
+            det_filepaths[stream] = det_filepath
+            # Check that det files exists
+            if not os.path.exists(det_filepath):
+                raise FileNotFoundError(f"{det_filepath} does not exists")
 
     # det_filepath = get_filepath_from_run(run, "kinetix-det1_stream")
     # panda_filepath = get_filepath_from_run(run, "panda1_stream")
@@ -81,6 +88,7 @@ def export_tomo(run, export_dir=None):
     if os.path.exists(nx_filepath):
         raise FileExistsError(f"{nx_filepath} exists. Not overwriting it")
 
+    # TODO: does this really need to be 'a' and not 'x' now that linking works as expected?
     # Need 'a' instead of 'x' mode in order to change external link mode
     with h5py.File(nx_filepath, "a") as h5_file:
         entry_grp = h5_file.require_group("entry")
@@ -93,8 +101,6 @@ def export_tomo(run, export_dir=None):
         #         dtype = get_dtype(value)
         #         current_metadata_grp.create_dataset(key, data=value, dtype=dtype)
 
-        # External links:
-        # multiple kinetix dets - entry/data/data becomes entry/data/kinetix-det1, entry/data/kinetix-det2, etc.
         if len(rel_det_filepaths) > 1:
             for stream_name, det_filepath in rel_det_filepaths.items():
                 nxs_data_name = stream_name.split("_")[0]
@@ -102,7 +108,6 @@ def export_tomo(run, export_dir=None):
                     det_filepath.as_posix(),
                     f"entry/data/data"
                 )
-                # data_grp.move("data", nxs_data_name)
         else:
             for stream_name, det_filepath in rel_det_filepaths.items():
                 data_grp["data"] = h5py.ExternalLink(
