@@ -55,14 +55,16 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
     date = datetime.datetime.fromtimestamp(start_doc["time"])
 
     if export_dir is None:
-        export_dir = common_parent_dir
+        export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/scan_{start_doc['scan_id']:05d}/"
 
-    if file_prefix is None:
-        file_prefix = "{start[plan_name]}_{start[scan_id]}_{date.year:04d}-{date.month:02d}-{date.day:02d}.nxs"
+    # if file_prefix is None:
+    #     file_prefix = "{start[plan_name]}_{start[scan_id]}_{date.year:04d}-{date.month:02d}-{date.day:02d}.nxs"
 
-    rendered_file_name = file_prefix.format(start=start_doc, date=date, counter=counter)
+    filename = f"scan_{start_doc['scan_id']:05d}.nxs"
 
-    nx_filepath = Path(export_dir) / Path(rendered_file_name)
+    # rendered_file_name = file_prefix.format(start=start_doc, date=date, counter=counter)
+
+    nx_filepath = Path(export_dir) / Path(filename)
     print(f"{nx_filepath = }")
 
     # rel_nx = nx_filepath.relative_to(common_parent_dir)
@@ -82,11 +84,11 @@ def export_tomo(run, export_dir=None, file_prefix=None, counter=0):
 
         # External links:
         data_grp["data"] = h5py.ExternalLink(
-            rel_det_filepath.as_posix(),
+            det_filepath.as_posix(),
             "entry/data/data",
         )
         data_grp["rotation_angle"] = h5py.ExternalLink(
-            rel_panda_filepath.as_posix(),
+            panda_filepath.as_posix(),
             "Angle",
         )
 
