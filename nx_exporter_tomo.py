@@ -211,7 +211,7 @@ def export_dark_flat(run, export_dir=None):
 
         if len(rel_dark_filepaths) > 1:
             for stream_name, det_filepath in rel_dark_filepaths.items():
-                dark_data_name = f'dark_{stream_name.split("_")[0]}'
+                dark_data_name = f'dark-{stream_name.split("_")[0]}'
                 data_grp[dark_data_name] = h5py.ExternalLink(
                     det_filepath.as_posix(),
                     f"entry/data/data"
@@ -226,7 +226,7 @@ def export_dark_flat(run, export_dir=None):
 
         if len(rel_flat_filepaths) > 1:
             for stream_name, det_filepath in rel_flat_filepaths.items():
-                flat_data_name = f'flat_{stream_name.split("_")[0]}'
+                flat_data_name = f'flat-{stream_name.split("_")[0]}'
                 data_grp[flat_data_name] = h5py.ExternalLink(
                     det_filepath.as_posix(),
                     f"entry/data/data"
