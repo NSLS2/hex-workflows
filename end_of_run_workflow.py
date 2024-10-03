@@ -19,8 +19,11 @@ def end_of_run_workflow(stop_doc):
     run = tiled_client["hex"]["raw"][uid]
     start_doc = run.metadata["start"]
 
-    if start_doc["plan_name"] in ["tomo_flyscan"]:
+    if start_doc.get("tomo_scanning_mode") in ["tomo_dark_flat", "tomo_flyscan"]:
         export_tomo_flow(uid)
+
+    # if start_doc["plan_name"] in ["tomo_flyscan"]:
+    #     export_tomo_flow(uid)
 
     # if "germ" in [det.lower() for det in run.metadata['start']["detectors"]]:
     #     export_edxd_flow(uid)
