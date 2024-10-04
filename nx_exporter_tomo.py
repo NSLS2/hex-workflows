@@ -64,7 +64,7 @@ def export_tomo(run, export_dir=None):
     print(f"{det_filepaths = !r}\n{panda_filepath = !r}")
 
     if export_dir is None:
-        export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/scan_{start_doc['scan_id']:05d}/metadata/"
+        export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/metadata/scan_{start_doc['scan_id']:05d}/"
         # Create scan_00000 folder
         Path(export_dir).mkdir(parents=True, exist_ok=True)
 
@@ -168,7 +168,7 @@ def export_dark_flat(run, export_dir=None):
     print(f"{dark_filepaths = !r}\n{flat_filepaths = !r}")
 
     if export_dir is None:
-        export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/scan_{start_doc['scan_id']:05d}/metadata/"
+        export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/metadata/scan_{start_doc['scan_id']:05d}/"
         # Create scan_00000 folder
         Path(export_dir).mkdir(parents=True, exist_ok=True)
 
