@@ -72,10 +72,10 @@ def export_tomo(run, export_dir=None):
     common_parent_dir = os.path.commonprefix([export_dir, panda_filepath])
     print(f"{common_parent_dir = }")
 
-    rel_panda_filepath = Path(f"../../{Path(panda_filepath).relative_to(common_parent_dir)}")
+    rel_panda_filepath = Path(f"../../../{Path(panda_filepath).relative_to(common_parent_dir)}")
     rel_det_filepaths = {}
     for stream_name, det_filepath in det_filepaths.items():
-        rel_det_filepaths[stream_name] = Path(f"../../{Path(det_filepath).relative_to(common_parent_dir)}")
+        rel_det_filepaths[stream_name] = Path(f"../../../{Path(det_filepath).relative_to(common_parent_dir)}")
 
     print(f"{rel_panda_filepath = }")
     print(f"{rel_det_filepaths = }")
@@ -179,11 +179,11 @@ def export_dark_flat(run, export_dir=None):
 
     rel_dark_filepaths = {}
     for stream_name, det_filepath in dark_filepaths.items():
-        rel_dark_filepaths[stream_name] = Path(f"../../{Path(det_filepath).relative_to(common_parent_dir)}")
+        rel_dark_filepaths[stream_name] = Path(f"../../../{Path(det_filepath).relative_to(common_parent_dir)}")
 
     rel_flat_filepaths = {}
     for stream_name, det_filepath in flat_filepaths.items():
-        rel_flat_filepaths[stream_name] = Path(f"../../{Path(det_filepath).relative_to(common_parent_dir)}")
+        rel_flat_filepaths[stream_name] = Path(f"../../../{Path(det_filepath).relative_to(common_parent_dir)}")
 
     print(f"{rel_dark_filepaths = }")
     print(f"{rel_flat_filepaths = }")
