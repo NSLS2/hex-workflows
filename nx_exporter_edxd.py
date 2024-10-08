@@ -38,6 +38,7 @@ GERM_DETECTOR_KEYS = [
 
 
 def get_filepath_from_run(run, stream_name):
+    """Get raw detector data files from tiled."""
     entry = run[stream_name]["external"].values().last()
     filepath = get_asset_filepaths(entry)[0]
     if not filepath.is_file():
@@ -46,26 +47,27 @@ def get_filepath_from_run(run, stream_name):
     return filepath
 
 
-def get_det_copy_filepath(start_doc):
-    det_copy_filepath = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/raw_data/scan_{start_doc['scan_id']:05d}/"
-    Path(det_copy_filepath).mkdir(parents=True, exist_ok=True)
-    det_copy_filename = f"scan_{start_doc['scan_id']:05d}_{start_doc['uid']}.h5"
-    full_det_filename = det_copy_filepath + det_copy_filename
-    return full_det_filename
+# def get_det_copy_filepath(start_doc):
+#     """Get new path and file name to copy raw detector data files to."""
+#     det_copy_filepath = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/metadata/scan_{start_doc['scan_id']:05d}/"
+#     Path(det_copy_filepath).mkdir(parents=True, exist_ok=True)
+#     det_copy_filename = f"scan_{start_doc['scan_id']:05d}_{start_doc['uid']}.h5"
+#     full_det_filename = det_copy_filepath + det_copy_filename
+#     return full_det_filename
 
 
-@task
-def copy_file(run):
-    start_doc = run.metadata["start"]
-    # Get det data file in assets dir
-    source = get_filepath_from_run(run, "primary")
-    print(f"{source = }")
-    # Get destination dir in proposal dir
-    dest = get_det_copy_filepath(start_doc)
-    print(f"Copying {source} to {dest}")
-    copy2(source, dest)
-    print("Done copying file")
-    return dest
+# @task
+# def copy_file(run):
+#     start_doc = run.metadata["start"]
+#     # Get det data file in assets dir
+#     source = get_filepath_from_run(run, "primary")
+#     print(f"{source = }")
+#     # Get destination dir in proposal dir
+#     dest = get_det_copy_filepath(start_doc)
+#     print(f"Copying {source} to {dest}")
+#     copy2(source, dest)
+#     print("Done copying file")
+#     return dest
 
 
 def get_detector_parameters_from_tiled(run, det_name=None, keys=None):
@@ -118,17 +120,23 @@ def get_motor_metadata(run):
 
 @task
 def create_combined_file(run, det_name, copied_det_file):
+    """Combine the raw detector file and metadata into one file."""
     start_doc = run.start
-    export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/raw_data/scan_{start_doc['scan_id']:05d}/"
-    date = datetime.datetime.fromtimestamp(start_doc["time"])
+    export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/metadata/scan_{start_doc['scan_id']:05d}/"
 
-    if start_doc.get("theta") is not None:
-        filename = f"scan_{start_doc['scan_id']:05d}_{start_doc['calibrant']}_{start_doc['theta']:.3f}deg_{date.month:02d}_{date.day:02d}_{date.year:04d}.h5"
-    else:
-        filename = f"scan_{start_doc['scan_id']:05d}_{date.month:02d}_{date.day:02d}_{date.year:04d}.h5"
+    filename = f"scan_{start_doc['scan_id']:05d}.nxs"
 
-    combined_h5_filepath = str(Path(export_dir) / Path(filename))
-    print(f"{combined_h5_filepath = }")
+    raw_det_filepath = get_filepath_from_run(run, "primary")
+
+    # need relative path of export_dir and raw_det_filepath for ExternalLink
+    common_parent_dir = os.path.commonprefix([export_dir, raw_det_filepath])
+    print(f"{common_parent_dir = }")
+
+    rel_det_filepath = Path(f"../../../{Path(raw_det_filepath).relative_to(common_parent_dir)}")
+    print(f"{rel_det_filepath = }")
+
+    nxs_filepath = str(Path(export_dir) / Path(filename))
+    print(f"{nxs_filepath = }")
 
     def get_dtype(value):
         if isinstance(value, str):
@@ -139,7 +147,7 @@ def create_combined_file(run, det_name, copied_det_file):
             return np.int32
         return type(value)
 
-    with h5py.File(combined_h5_filepath, "x") as h5_file:
+    with h5py.File(nxs_filepath, "x") as h5_file:
         entry_grp = h5_file.require_group("entry")
         data_grp = entry_grp.require_group("data")
 
@@ -154,17 +162,7 @@ def create_combined_file(run, det_name, copied_det_file):
                 current_metadata_grp.create_dataset(key, data=value, dtype=dtype)
 
         # External link
-        data_grp["data"] = h5py.ExternalLink(copied_det_file, "entry/data/data")
-
-        # static_motors group
-        # static_motors_grp = h5_file.require_group("entry/static_motors")
-        # motor_meta_dict = get_motor_metadata(run)
-        # for key, value in motor_meta_dict.items():
-        #     curr_motor_grp = h5_file.require_group(f"entry/static_motors/{key.split('_')[0]}")
-        #     if key not in curr_motor_grp:
-        #         dtype = get_dtype(value)
-        #         # if need to update key names, do in line below?
-        #         curr_motor_grp.create_dataset(key, data=value, dtype=dtype)
+        data_grp["data"] = h5py.ExternalLink(rel_det_filepath.as_posix(), "entry/data/data")
 
         # static_motors group
         static_motors_grp = entry_grp.require_group("static_motors")
@@ -182,7 +180,5 @@ def create_combined_file(run, det_name, copied_det_file):
 def export_edxd_flow(ref):
     print(f"tiled: {tiled.__version__}")
     run = tiled_client_hex[ref]
-    copied_det_filename = copy_file(run)
-    print(f"{copied_det_filename = }")
     create_combined_file(run, det_name="GeRM", copied_det_file=copied_det_filename)
     print("Done!")
