@@ -119,7 +119,7 @@ def get_motor_metadata(run):
     return nested_motor_metadata
 
 @task
-def create_combined_file(run, det_name, copied_det_file):
+def create_combined_file(run, det_name):
     """Combine the raw detector file and metadata into one file."""
     start_doc = run.start
     export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/metadata/scan_{start_doc['scan_id']:05d}/"
@@ -180,5 +180,5 @@ def create_combined_file(run, det_name, copied_det_file):
 def export_edxd_flow(ref):
     print(f"tiled: {tiled.__version__}")
     run = tiled_client_hex[ref]
-    create_combined_file(run, det_name="GeRM", copied_det_file=copied_det_filename)
+    create_combined_file(run, det_name="GeRM")
     print("Done!")
