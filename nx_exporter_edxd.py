@@ -1,7 +1,5 @@
-import datetime
 import os
 from pathlib import Path
-from shutil import copy2
 
 import h5py
 import numpy as np
@@ -47,29 +45,6 @@ def get_filepath_from_run(run, stream_name):
     return filepath
 
 
-# def get_det_copy_filepath(start_doc):
-#     """Get new path and file name to copy raw detector data files to."""
-#     det_copy_filepath = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/metadata/scan_{start_doc['scan_id']:05d}/"
-#     Path(det_copy_filepath).mkdir(parents=True, exist_ok=True)
-#     det_copy_filename = f"scan_{start_doc['scan_id']:05d}_{start_doc['uid']}.h5"
-#     full_det_filename = det_copy_filepath + det_copy_filename
-#     return full_det_filename
-
-
-# @task
-# def copy_file(run):
-#     start_doc = run.metadata["start"]
-#     # Get det data file in assets dir
-#     source = get_filepath_from_run(run, "primary")
-#     print(f"{source = }")
-#     # Get destination dir in proposal dir
-#     dest = get_det_copy_filepath(start_doc)
-#     print(f"Copying {source} to {dest}")
-#     copy2(source, dest)
-#     print("Done copying file")
-#     return dest
-
-
 def get_detector_parameters_from_tiled(run, det_name=None, keys=None):
     """Auxiliary function to get detector parameters from tiled.
 
@@ -106,6 +81,7 @@ def get_detector_parameters_from_tiled(run, det_name=None, keys=None):
 
 
 def get_motor_metadata(run):
+    """Get motor information from tiled."""
     all_motors = {*()}
     for k in sorted(run.baseline['config']):
         if 'motor' in k:
@@ -119,8 +95,8 @@ def get_motor_metadata(run):
     return nested_motor_metadata
 
 @task
-def create_combined_file(run, det_name):
-    """Combine the raw detector file and metadata into one file."""
+def create_edxd_nxs_file(run, det_name):
+    """Create nexus file with raw data and metadata."""
     start_doc = run.start
     export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/metadata/scan_{start_doc['scan_id']:05d}/"
     Path(export_dir).mkdir(parents=True, exist_ok=True)
@@ -177,9 +153,9 @@ def create_combined_file(run, det_name):
                     curr_motor_grp.create_dataset(field, data=value, dtype=dtype)
 
 
-@flow
+@flow(log_prints=True)
 def export_edxd_flow(ref):
     print(f"tiled: {tiled.__version__}")
     run = tiled_client_hex[ref]
-    create_combined_file(run, det_name="GeRM")
+    create_edxd_nxs_file(run, det_name="GeRM")
     print("Done!")
