@@ -167,10 +167,10 @@ def create_combined_file(run, det_name, copied_det_file):
         #         curr_motor_grp.create_dataset(key, data=value, dtype=dtype)
 
         # static_motors group
-        static_motors_grp = h5_file.require_group("entry/static_motors")
+        static_motors_grp = entry_grp.require_group("static_motors")
         motor_meta_dict = get_motor_metadata(run)
         for motor_name, values in motor_meta_dict.items():
-            curr_motor_grp = h5_file.require_group(f"entry/static_motors/{motor_name}")
+            curr_motor_grp = static_motors_grp.require_group(f"{motor_name}")
             for field, value in values.items():
                 if field not in curr_motor_grp:
                     dtype = get_dtype(value)
