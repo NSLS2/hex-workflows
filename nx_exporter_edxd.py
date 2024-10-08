@@ -123,6 +123,7 @@ def create_combined_file(run, det_name):
     """Combine the raw detector file and metadata into one file."""
     start_doc = run.start
     export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/edxd/metadata/scan_{start_doc['scan_id']:05d}/"
+    Path(export_dir).mkdir(parents=True, exist_ok=True)
 
     filename = f"scan_{start_doc['scan_id']:05d}.nxs"
 
