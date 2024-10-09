@@ -32,5 +32,6 @@ def end_of_run_workflow(stop_doc):
     else:
         print("Unknown tomo scanning mode. Not exporting.")
 
-    data_validation(uid)
+    # Disabling until validation fixed
+    # data_validation(uid)
     log_completion()
