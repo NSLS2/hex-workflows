@@ -157,5 +157,5 @@ def create_edxd_nxs_file(run, det_name):
 def export_edxd_flow(ref):
     print(f"tiled: {tiled.__version__}")
     run = tiled_client_hex[ref]
-    create_edxd_nxs_file(run, det_name="GeRM")
+    create_edxd_nxs_file(run, det_name="germ")
     print("Done!")
