@@ -9,12 +9,15 @@ from tiled.client.utils import get_asset_filepaths
 
 
 def get_filepath_from_run(run, stream_name):
-    entry = run[stream_name]["external"].values().last()
-    filepath = get_asset_filepaths(entry)[0]
-    if not filepath.is_file():
-        msg = f"{filepath!r} does not exist!"
-        raise RuntimeError(msg)
-    return filepath
+    filepaths = {det: "" for det in run[stream_name]["external"]}
+    for det in filepaths.keys():
+        entry = run[stream_name]["external"][det]
+        filepath = get_asset_filepaths(entry)[0]
+        if not filepath.is_file():
+            msg = f"{filepath!r} does not exist!"
+            raise RuntimeError(msg)
+        filepaths[det] = filepath
+    return filepaths
 
 
 def get_dtype(value):
@@ -46,18 +49,26 @@ def export_tomo(run, export_dir=None):
     start_doc = run.metadata["start"]
 
     det_filepaths = {}
+    if "tomo" not in run:
+        print("No 'tomo' stream. Skipping.")
+        return
     for stream in run:
-        if "panda" in stream:
-            panda_filepath = get_filepath_from_run(run, stream)
-            # Check that panda file exists
-            if not os.path.exists(panda_filepath):
-                raise FileNotFoundError(f"{panda_filepath} does not exist")
-        elif "kinetix" in stream:
-            det_filepath = get_filepath_from_run(run, stream)
-            det_filepaths[stream] = det_filepath
-            # Check that det files exist
-            if not os.path.exists(det_filepath):
-                raise FileNotFoundError(f"{det_filepath} does not exist")
+        if "tomo" in stream:
+            filepaths = get_filepath_from_run(run, stream)
+            for det, filepath in filepaths.items():
+                if "Angle" in det:
+                    panda_filepath = filepath
+                    # Check that panda file exists
+                    if not os.path.exists(panda_filepath):
+                        raise FileNotFoundError(f"{panda_filepath} does not exist")
+                elif "kinetix" in det:
+                    det_filepath = filepath
+                    det_filepaths[det] = det_filepath
+                    # Check that det files exist
+                    if not os.path.exists(det_filepath):
+                        raise FileNotFoundError(f"{det_filepath} does not exist")
+        else:
+            pass
 
     # det_filepath = get_filepath_from_run(run, "kinetix-det1_stream")
     # panda_filepath = get_filepath_from_run(run, "panda1_stream")
@@ -254,7 +265,6 @@ def export_dark_flat(run, export_dir=None):
 @flow(log_prints=True)
 def export_tomo_flow(ref):
     uid = ref
-    logger = get_run_logger()
     tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
     if tiled_server_type == "facility":
         tiled_client = from_profile("nsls2")
