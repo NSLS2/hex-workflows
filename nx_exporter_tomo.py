@@ -8,7 +8,7 @@ from tiled.client import from_profile, from_uri
 from tiled.client.utils import get_asset_filepaths
 
 
-def get_filepath_from_run(run, stream_name):
+def get_filepath_from_run_tomo(run, stream_name):
     filepaths = {det: "" for det in run[stream_name]["external"]}
     for det in filepaths.keys():
         entry = run[stream_name]["external"][det]
@@ -18,6 +18,15 @@ def get_filepath_from_run(run, stream_name):
             raise RuntimeError(msg)
         filepaths[det] = filepath
     return filepaths
+
+
+def get_filepath_from_run_dark_flat(run, stream_name):
+    entry = run[stream_name]["external"].values().last()
+    filepath = get_asset_filepaths(entry)[0]
+    if not filepath.is_file():
+        msg = f"{filepath!r} does not exist!"
+        raise RuntimeError(msg)
+    return filepath
 
 
 def get_dtype(value):
@@ -54,7 +63,7 @@ def export_tomo(run, export_dir=None):
         return
     for stream in run:
         if "tomo" in stream:
-            filepaths = get_filepath_from_run(run, stream)
+            filepaths = get_filepath_from_run_tomo(run, stream)
             for det, filepath in filepaths.items():
                 if "Angle" in det:
                     panda_filepath = filepath
@@ -164,13 +173,13 @@ def export_dark_flat(run, export_dir=None):
     flat_filepaths = {}
     for stream in run:
         if "dark" in stream:
-            dark_filepath = get_filepath_from_run(run, stream)
+            dark_filepath = get_filepath_from_run_dark_flat(run, stream)
             dark_filepaths[stream] = dark_filepath
             # Check that dark files exist
             if not os.path.exists(dark_filepath):
                 raise FileNotFoundError(f"{dark_filepath} does not exist")
         elif "flat" in stream:
-            flat_filepath = get_filepath_from_run(run, stream)
+            flat_filepath = get_filepath_from_run_dark_flat(run, stream)
             flat_filepaths[stream] = flat_filepath
             # Check that flat files exist
             if not os.path.exists(flat_filepath):
