@@ -20,18 +20,22 @@ def end_of_run_workflow(stop_doc):
     run = tiled_client["hex"]["raw"][uid]
     start_doc = run.metadata["start"]
 
-    scan_type = start_doc.get("tomo_scanning_mode")
-    print(f"{scan_type = }")
+    exit_status = run.stop.get("exit_status")
+    if exit_status == "success":
+        scan_type = start_doc.get("tomo_scanning_mode")
+        print(f"{scan_type = }")
 
-    if scan_type in ["tomo_dark_flat", "tomo_flyscan"]:
-        print("Running export_tomo_flow")
-        export_tomo_flow(uid)
-    elif scan_type == "edxd":
-        print("Running export_edxd_flow")
-        export_edxd_flow(uid)
+        if scan_type in ["tomo_dark_flat", "tomo_flyscan"]:
+            print("Running export_tomo_flow")
+            export_tomo_flow(uid)
+        elif scan_type == "edxd":
+            print("Running export_edxd_flow")
+            export_edxd_flow(uid)
+        else:
+            print("Unknown tomo scanning mode. Not exporting.")
+
+        # Disabling until validation fixed
+        # data_validation(uid)
+        log_completion()
     else:
-        print("Unknown tomo scanning mode. Not exporting.")
-
-    # Disabling until validation fixed
-    # data_validation(uid)
-    log_completion()
+        print(f"Not running flow. {exit_status = }")
