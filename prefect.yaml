@@ -15,7 +15,7 @@ push:
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
 - prefect.deployments.steps.git_clone:
-    repository: https://github.com/NSLS-II-HEX/workflows
+    repository: https://github.com/NSLS2/hex-workflows
     branch: main
 
 # the deployments section allows you to provide configuration for deploying flows
@@ -28,30 +28,7 @@ deployments:
   entrypoint: end_of_run_workflow.py:end_of_run_workflow
   parameters: {}
   work_pool:
-    name: hex-agent-pool
-    work_queue_name:
-    job_variables: {}
-  schedule:
-  is_schedule_active: true
-- name: hex-data-validation
-  version:
-  tags: [hex]
-  description:
-  entrypoint: data_validation.py:data_validation
-  parameters: {}
-  work_pool:
-    name: hex-agent-pool
-    work_queue_name:
-    job_variables: {}
-  schedule:
-- name: hex-export
-  version:
-  tags: []
-  description:
-  entrypoint: nx_exporter.py:export_flow
-  parameters: {}
-  work_pool:
-    name: hex-agent-pool
+    name: hex-work-pool
     work_queue_name:
     job_variables: {}
   schedule:
