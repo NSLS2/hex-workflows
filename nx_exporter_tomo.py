@@ -9,9 +9,9 @@ from tiled.client.utils import get_asset_filepaths
 
 
 def get_filepath_from_run_tomo(run, stream_name):
-    filepaths = {det: "" for det in run[stream_name]["external"]}
+    filepaths = {det: "" for det in run["streams"][stream_name]}
     for det in filepaths.keys():
-        entry = run[stream_name]["external"][det]
+        entry = run["streams"][stream_name][det]
         filepath = get_asset_filepaths(entry)[0]
         if not filepath.is_file():
             msg = f"{filepath!r} does not exist!"
@@ -21,7 +21,7 @@ def get_filepath_from_run_tomo(run, stream_name):
 
 
 def get_filepath_from_run_dark_flat(run, stream_name):
-    entry = run[stream_name]["external"].values().last()
+    entry = run["streams"][stream_name].values().last()
     filepath = get_asset_filepaths(entry)[0]
     if not filepath.is_file():
         msg = f"{filepath!r} does not exist!"
@@ -58,7 +58,7 @@ def export_tomo(run, export_dir=None):
     start_doc = run.metadata["start"]
 
     det_filepaths = {}
-    if "tomo" not in list(run["streams"]):
+    if "tomo" not in run["streams"]:
         print("No 'tomo' stream. Skipping.")
         return
     for stream in run["streams"]:
@@ -171,7 +171,7 @@ def export_dark_flat(run, export_dir=None):
 
     dark_filepaths = {}
     flat_filepaths = {}
-    for stream in run:
+    for stream in run["streams"]:
         if "dark" in stream:
             dark_filepath = get_filepath_from_run_dark_flat(run, stream)
             dark_filepaths[stream] = dark_filepath
