@@ -17,7 +17,7 @@ def read_all_streams(uid, beamline_acronym):
         run = tiled_client[uid]
     logger.info(f"Validating uid {run.metadata['start']['uid']}")
     start_time = ttime.monotonic()
-    for stream in run:
+    for stream in run["streams"]:
         logger.info(f"{stream}:")
         stream_start_time = ttime.monotonic()
         stream_data = run[stream].read()
