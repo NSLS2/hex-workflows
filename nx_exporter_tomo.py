@@ -58,10 +58,10 @@ def export_tomo(run, export_dir=None):
     start_doc = run.metadata["start"]
 
     det_filepaths = {}
-    if "tomo" not in run:
+    if "tomo" not in run["streams"]:
         print("No 'tomo' stream. Skipping.")
         return
-    for stream in run:
+    for stream in run["streams"]:
         if "tomo" in stream:
             filepaths = get_filepath_from_run_tomo(run, stream)
             for det, filepath in filepaths.items():
