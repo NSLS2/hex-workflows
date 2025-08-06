@@ -21,12 +21,15 @@ def get_filepath_from_run_tomo(run, stream_name):
 
 
 def get_filepath_from_run_dark_flat(run, stream_name):
-    entry = run["streams"][stream_name].values().last()
-    filepath = get_asset_filepaths(entry)[0]
-    if not filepath.is_file():
-        msg = f"{filepath!r} does not exist!"
-        raise RuntimeError(msg)
-    return filepath
+    filepaths = {det: "" for det in run["streams"][stream_name]}
+    for det in filepaths.keys():
+        entry = run["streams"][stream_name][det]
+        filepath = get_asset_filepaths(entry)[0]
+        if not filepath.is_file():
+            msg = f"{filepath!r} does not exist!"
+            raise RuntimeError(msg)
+        filepaths[det] = filepath
+    return filepaths
 
 
 def get_dtype(value):
@@ -173,17 +176,9 @@ def export_dark_flat(run, export_dir=None):
     flat_filepaths = {}
     for stream in run["streams"]:
         if "dark" in stream:
-            dark_filepath = get_filepath_from_run_dark_flat(run, stream)
-            dark_filepaths[stream] = dark_filepath
-            # Check that dark files exist
-            if not os.path.exists(dark_filepath):
-                raise FileNotFoundError(f"{dark_filepath} does not exist")
+            dark_filepaths = get_filepath_from_run_dark_flat(run, stream)
         elif "flat" in stream:
-            flat_filepath = get_filepath_from_run_dark_flat(run, stream)
-            flat_filepaths[stream] = flat_filepath
-            # Check that flat files exist
-            if not os.path.exists(flat_filepath):
-                raise FileNotFoundError(f"{flat_filepath} does not exist")
+            flat_filepaths = get_filepath_from_run_dark_flat(run, stream)
 
     print(f"{dark_filepaths = !r}\n{flat_filepaths = !r}")
 
@@ -194,7 +189,7 @@ def export_dark_flat(run, export_dir=None):
 
     # need relative path of export_dir and panda_filepath for ExternalLink
     # doesn't matter which filepath used, just grab last one
-    common_parent_dir = os.path.commonprefix([export_dir, dark_filepath])
+    common_parent_dir = os.path.commonprefix([export_dir, dark_filepaths[list(dark_filepaths.keys())[0]]])
     print(f"{common_parent_dir = }")
 
     rel_dark_filepaths = {}
@@ -230,14 +225,14 @@ def export_dark_flat(run, export_dir=None):
         #         current_metadata_grp.create_dataset(key, data=value, dtype=dtype)
 
         if len(rel_dark_filepaths) > 1:
-            for stream_name, det_filepath in rel_dark_filepaths.items():
-                dark_data_name = f'dark-{stream_name.split("_")[0]}'
+            for det, det_filepath in rel_dark_filepaths.items():
+                dark_data_name = f'dark-{det}'
                 data_grp[dark_data_name] = h5py.ExternalLink(
                     det_filepath.as_posix(),
                     f"entry/data/data"
                 )
         else:
-            for stream_name, det_filepath in rel_dark_filepaths.items():
+            for det, det_filepath in rel_dark_filepaths.items():
                 dark_data_name = "dark"
                 data_grp[dark_data_name] = h5py.ExternalLink(
                     det_filepath.as_posix(),
@@ -245,14 +240,14 @@ def export_dark_flat(run, export_dir=None):
                 )
 
         if len(rel_flat_filepaths) > 1:
-            for stream_name, det_filepath in rel_flat_filepaths.items():
-                flat_data_name = f'flat-{stream_name.split("_")[0]}'
+            for det, det_filepath in rel_flat_filepaths.items():
+                flat_data_name = f'flat-{det}'
                 data_grp[flat_data_name] = h5py.ExternalLink(
                     det_filepath.as_posix(),
                     f"entry/data/data"
                 )
         else:
-            for stream_name, det_filepath in rel_flat_filepaths.items():
+            for det, det_filepath in rel_flat_filepaths.items():
                 flat_data_name = "flat"
                 data_grp[flat_data_name] = h5py.ExternalLink(
                     det_filepath.as_posix(),
