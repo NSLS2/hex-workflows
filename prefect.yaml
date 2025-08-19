@@ -8,51 +8,79 @@ prefect-version: 2.13.0
 
 # build section allows you to manage and build docker images
 build:
+  - prefect.deployments.steps.run_shell_script:
+      id: get-commit-hash
+      script: git rev-parse --short HEAD
+      stream_output: false
+  - prefect_docker.deployments.steps.build_docker_image:
+      id: build-image
+      requires: prefect-docker>0.6.0
+      image_name: ghcr.io/nsls2/hex-workflow-prefect3
+      tag: "{{ get-commit-hash.stdout }}"
+      dockerfile: Dockerfile
+      additional_tags:
+        - main
 
 # push section allows you to manage if and how this project is uploaded to remote locations
 push:
+  - prefect_docker.deployments.steps.push_docker_image:
+      requires: prefect-docker>0.6.0
+      image_name: "{{ build-image.image_name }}"
+      tag: "{{ build-image.tag }}"
+      credentials:
+        "{{
+        prefect.blocks.docker-registry-credentials.ghcr-nsls2-hex-workflow-prefect3
+        }}"
+      additional_tags:
+        - main
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NSLS-II-HEX/workflows
-    branch: main
+    branch: prefect3-pixi-upgrade
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: hex-end-of-run-workflow
-  version:
-  tags:
-  - hex
-  description:
-  entrypoint: end_of_run_workflow.py:end_of_run_workflow
-  parameters: {}
-  work_pool:
-    name: hex-agent-pool
-    work_queue_name:
-    job_variables: {}
-  schedule:
-  is_schedule_active: true
-- name: hex-data-validation
-  version:
-  tags: [hex]
-  description:
-  entrypoint: data_validation.py:data_validation
-  parameters: {}
-  work_pool:
-    name: hex-agent-pool
-    work_queue_name:
-    job_variables: {}
-  schedule:
-- name: hex-export
-  version:
-  tags: []
-  description:
-  entrypoint: nx_exporter.py:export_flow
-  parameters: {}
-  work_pool:
-    name: hex-agent-pool
-    work_queue_name:
-    job_variables: {}
-  schedule:
-  is_schedule_active: true
+  - name: hex-end-of-run-workflow
+    version: 0.1.0
+    tags:
+      - hex
+      - main
+    description:
+    entrypoint: end_of_run_workflow.py:end_of_run_workflow
+    parameters: {}
+    work_pool:
+      name: hex-work-pool-docker
+      job_variables:
+        env:
+          TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
+          TILED_API_KEY: "{{ prefect.blocks.secret.tiled-hex-api-key }}"
+        image: ghcr.io/nsls2/hex-workflow-prefect3:main
+        network_mode: host
+        userns: "keep-id:uid=402973,gid=402973"  # workflow-hex:workflow-hex
+        volumes:
+          - /nsls2/data/hex/proposals:/nsls2/data/hex/proposals
+          - /nsls2/software/etc/tiled:/nsls2/software/etc/tiled
+
+  - name: hex-data-validation
+    version: 0.1.0
+    tags:
+      - hex
+      - main
+    description:
+    entrypoint: data_validation.py:data_validation
+    parameters: {}
+    work_pool:
+      name: hex-work-pool-docker
+      work_queue_name:
+      job_variables: {}
+  - name: hex-export
+    version:
+    tags:
+      - main
+    description:
+    entrypoint: nx_exporter.py:export_flow
+    parameters: {}
+    work_pool:
+      name: hex-work-pool-docker
