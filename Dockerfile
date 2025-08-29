@@ -20,6 +20,8 @@ COPY test.py .
 
 ENV TILED_API_KEY=""
 RUN mkdir /etc/tiled
+RUN mkdir /.prefect -m 0777
+RUN mkdir /repo -m 0777
 RUN /bin/bash /shell-hook
 
 #now reapply deployment to push the image that is being created
