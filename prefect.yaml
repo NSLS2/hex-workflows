@@ -57,11 +57,12 @@ deployments:
           TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
           TILED_API_KEY: "{{ prefect.blocks.secret.tiled-hex-api-key }}"
         image: ghcr.io/nsls2/hex-workflow-prefect3:main
-        network_mode: host
-        userns: "keep-id:uid=402973,gid=402973"  # workflow-hex:workflow-hex
+        network: slirp4netns
         volumes:
           - /nsls2/data/hex/proposals:/nsls2/data/hex/proposals
           - /nsls2/software/etc/tiled:/nsls2/software/etc/tiled
+        container_create_kwargs:
+          userns_mode: "keep-id:uid=402973,gid=402973"  # workflow-hex:workflow-hex
 
   - name: hex-data-validation
     version: 0.1.0
