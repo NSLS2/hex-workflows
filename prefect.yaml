@@ -39,7 +39,7 @@ pull:
 - prefect.deployments.steps.set_working_directory:
     directory: /repo
 - prefect.deployments.steps.git_clone:
-    repository: https://github.com/JunAishima/hex-workflows
+    repository: https://github.com/NSLS2/hex-workflows
     branch: prefect3-pixi-upgrade
 
 # the deployments section allows you to provide configuration for deploying flows
