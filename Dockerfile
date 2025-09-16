@@ -9,7 +9,7 @@ COPY pixi.toml .
 COPY pixi.lock .
 # use `--locked` to ensure the lockfile is up to date with pixi.toml
 RUN pixi config set --local run-post-link-scripts insecure
-RUN pixi install --frozen
+RUN pixi install --locked
 # create the shell-hook bash script to activate the environment
 RUN pixi shell-hook -s bash > /shell-hook
 
