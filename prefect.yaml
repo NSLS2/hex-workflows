@@ -43,6 +43,7 @@ deployments:
           - /nsls2/software/etc/tiled:/nsls2/software/etc/tiled
         container_create_kwargs:
           userns_mode: "keep-id:uid=402973,gid=402973"  # workflow-hex:workflow-hex
+        auto_remove: true
 
   - name: hex-data-validation
     version: 0.1.0
