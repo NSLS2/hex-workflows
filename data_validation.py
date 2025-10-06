@@ -3,6 +3,7 @@ import time as ttime
 
 from prefect import flow, get_run_logger, task
 from tiled.client import from_profile, from_uri
+from utils import get_tiled_client
 
 
 @task(retries=2, retry_delay_seconds=10)
@@ -10,8 +11,8 @@ def read_all_streams(uid, beamline_acronym):
     logger = get_run_logger()
     tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
     if tiled_server_type == "facility":
-        tiled_client = from_profile("nsls2")
-        run = tiled_client[beamline_acronym]["raw"][uid]
+        tiled_client = get_tiled_client()
+        run = tiled_client["raw"][uid]
     elif tiled_server_type == "local":
         tiled_client = from_uri("http://localhost:8000")
         run = tiled_client[uid]

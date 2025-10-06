@@ -4,8 +4,9 @@ from pathlib import Path
 import h5py
 import numpy as np
 from prefect import flow, get_run_logger, task
-from tiled.client import from_profile, from_uri
+from tiled.client import from_uri
 from tiled.client.utils import get_asset_filepaths
+from utils import get_tiled_client
 
 
 def get_filepath_from_run_tomo(run, stream_name):
@@ -271,8 +272,8 @@ def export_tomo_flow(ref):
     uid = ref
     #tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
     #if tiled_server_type == "facility":
-    tiled_client = from_profile("nsls2")
-    run = tiled_client["hex"]["raw"][uid]
+    tiled_client = get_tiled_client()
+    run = tiled_client["raw"][uid]
     #elif tiled_server_type == "local":
     #    tiled_client = from_uri("http://localhost:8000")
     #    run = tiled_client[uid]

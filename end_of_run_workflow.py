@@ -3,7 +3,7 @@ from prefect import flow, get_run_logger, task
 from data_validation import data_validation
 from nx_exporter_edxd import export_edxd_flow
 from nx_exporter_tomo import export_tomo_flow
-from tiled.client import from_profile
+from utils import get_tiled_client
 
 
 @task
@@ -16,8 +16,8 @@ def log_completion():
 def end_of_run_workflow(stop_doc):
     uid = stop_doc["run_start"]
     print(f"{uid = }")
-    tiled_client = from_profile("nsls2")
-    run = tiled_client["hex"]["raw"][uid]
+    tiled_client = get_tiled_client()
+    run = tiled_client["raw"][uid]
     start_doc = run.metadata["start"]
 
     exit_status = run.stop.get("exit_status")
