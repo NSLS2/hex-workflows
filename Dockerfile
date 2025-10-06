@@ -16,7 +16,6 @@ ENV PYTHONUNBUFFERED=1
 
 COPY test.py .
 
-ENV TILED_API_KEY=""
 RUN mkdir /etc/tiled
 RUN mkdir /.prefect -m 0777
 RUN mkdir /repo -m 0777

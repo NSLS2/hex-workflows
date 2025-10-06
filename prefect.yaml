@@ -23,7 +23,7 @@ pull:
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
   - name: hex-end-of-run-workflow-docker
-    version: 0.1.0
+    version: 0.1.1
     tags:
       - hex
       - main
@@ -35,7 +35,6 @@ deployments:
       job_variables:
         env:
           TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
-          TILED_API_KEY: "{{ prefect.blocks.secret.tiled-hex-api-key }}"
         image: ghcr.io/nsls2/hex-workflow-prefect3:main
         network: slirp4netns
         volumes:
