@@ -5,10 +5,10 @@ import h5py
 import numpy as np
 import tiled
 from prefect import flow, task
+from tiled.client import from_profile
 from tiled.client.utils import get_asset_filepaths
-from utils import get_tiled_client
 
-tiled_client = get_tiled_client()
+tiled_client = from_profile("nsls2")["hex"]
 tiled_client_hex = tiled_client["raw"]
 
 GERM_DETECTOR_KEYS = [
