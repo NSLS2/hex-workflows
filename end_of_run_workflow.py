@@ -18,7 +18,7 @@ def end_of_run_workflow(stop_doc):
     uid = stop_doc["run_start"]
     print(f"{uid = }")
     api_key = Secret.load("tiled-hex-api-key").get()
-    tiled_client = from_profile("nsls2", api_key)
+    tiled_client = from_profile("nsls2", api_key=api_key)
     run = tiled_client["hex"]["raw"][uid]
     start_doc = run.metadata["start"]
 
