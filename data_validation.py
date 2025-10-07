@@ -2,6 +2,7 @@ import os
 import time as ttime
 
 from prefect import flow, get_run_logger, task
+from prefect.blocks.system import Secret
 from tiled.client import from_profile, from_uri
 
 
@@ -10,7 +11,8 @@ def read_all_streams(uid, beamline_acronym):
     logger = get_run_logger()
     tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
     if tiled_server_type == "facility":
-        tiled_client = from_profile("nsls2")
+        api_key = Secret.load("tiled-hex-api-key").get()
+        tiled_client = from_profile("nsls2", api_key=api_key)
         run = tiled_client[beamline_acronym]["raw"][uid]
     elif tiled_server_type == "local":
         tiled_client = from_uri("http://localhost:8000")
