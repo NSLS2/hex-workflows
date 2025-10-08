@@ -14,16 +14,14 @@ push: null
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
-- prefect.deployments.steps.set_working_directory:
-    directory: /repo
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NSLS2/hex-workflows
     branch: main
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-  - name: hex-end-of-run-workflow-docker
-    version: 0.1.1
+  - name: hex-end-of-run-workflow
+    version: 0.1.0
     tags:
       - hex
       - main
@@ -31,20 +29,7 @@ deployments:
     entrypoint: end_of_run_workflow.py:end_of_run_workflow
     parameters: {}
     work_pool:
-      name: hex-work-pool-docker
-      job_variables:
-        env:
-          TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
-        image: ghcr.io/nsls2/hex-workflows:main
-        image_pull_policy: Always
-        network: slirp4netns
-        volumes:
-          - /nsls2/data/hex/proposals:/nsls2/data/hex/proposals
-          - /nsls2/software/etc/tiled:/nsls2/software/etc/tiled
-        container_create_kwargs:
-          userns_mode: "keep-id:uid=402973,gid=402973"  # workflow-hex:workflow-hex
-        auto_remove: true
-
+      name: hex-work-pool
   - name: hex-data-validation
     version: 0.1.0
     tags:
@@ -54,7 +39,7 @@ deployments:
     entrypoint: data_validation.py:data_validation
     parameters: {}
     work_pool:
-      name: hex-work-pool-docker
+      name: hex-work-pool
       work_queue_name:
       job_variables: {}
   - name: hex-export
@@ -65,4 +50,4 @@ deployments:
     entrypoint: nx_exporter.py:export_flow
     parameters: {}
     work_pool:
-      name: hex-work-pool-docker
+      name: hex-work-pool

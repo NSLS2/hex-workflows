@@ -3,6 +3,7 @@ from prefect import flow, get_run_logger, task
 from data_validation import data_validation
 from nx_exporter_edxd import export_edxd_flow
 from nx_exporter_tomo import export_tomo_flow
+from prefect.blocks.system import Secret
 from tiled.client import from_profile
 
 
@@ -16,7 +17,8 @@ def log_completion():
 def end_of_run_workflow(stop_doc):
     uid = stop_doc["run_start"]
     print(f"{uid = }")
-    tiled_client = from_profile("nsls2")
+    api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
+    tiled_client = from_profile("nsls2", api_key=api_key)
     run = tiled_client["hex"]["raw"][uid]
     start_doc = run.metadata["start"]
 
