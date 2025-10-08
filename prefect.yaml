@@ -35,7 +35,7 @@ deployments:
       job_variables:
         env:
           TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
-        image: ghcr.io/nsls2/hex-workflow-prefect3:main
+        image: ghcr.io/nsls2/hex-workflows:prefect3-pixi-upgrade
         image_pull_policy: Always
         network: slirp4netns
         volumes:
