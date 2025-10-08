@@ -9,7 +9,7 @@ from prefect.blocks.system import Secret
 from tiled.client import from_profile
 from tiled.client.utils import get_asset_filepaths
 
-api_key = Secret.load("tiled-hex-api-key").get()
+api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
 tiled_client = from_profile("nsls2", api_key=api_key)["hex"]
 tiled_client_hex = tiled_client["raw"]
 

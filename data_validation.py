@@ -11,7 +11,7 @@ def read_all_streams(uid, beamline_acronym):
     logger = get_run_logger()
     tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
     if tiled_server_type == "facility":
-        api_key = Secret.load("tiled-hex-api-key").get()
+        api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
         tiled_client = from_profile("nsls2", api_key=api_key)
         run = tiled_client[beamline_acronym]["raw"][uid]
     elif tiled_server_type == "local":

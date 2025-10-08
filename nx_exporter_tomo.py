@@ -272,7 +272,7 @@ def export_tomo_flow(ref):
     uid = ref
     #tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
     #if tiled_server_type == "facility":
-    api_key = Secret.load("tiled-hex-api-key").get()
+    api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
     tiled_client = from_profile("nsls2", api_key=api_key)
     run = tiled_client["hex"]["raw"][uid]
     #elif tiled_server_type == "local":
