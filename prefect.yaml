@@ -18,7 +18,7 @@ pull:
     directory: /repo
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NSLS2/hex-workflows
-    branch: prefect3-pixi-upgrade
+    branch: main
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
@@ -35,7 +35,7 @@ deployments:
       job_variables:
         env:
           TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
-        image: ghcr.io/nsls2/hex-workflows:prefect3-pixi-upgrade
+        image: ghcr.io/nsls2/hex-workflows:main
         image_pull_policy: Always
         network: slirp4netns
         volumes:
