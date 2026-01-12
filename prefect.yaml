@@ -4,7 +4,7 @@
 
 # Generic metadata about this project
 name: workflows
-prefect-version: 2.13.0
+prefect-version: 3.4.6
 
 # build section allows you to manage and build docker images
 build: null
@@ -23,7 +23,7 @@ pull:
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
   - name: hex-end-of-run-workflow-docker
-    version: 0.1.1
+    version: 0.1.2
     tags:
       - hex
       - main
