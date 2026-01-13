@@ -4,7 +4,7 @@
 
 # Generic metadata about this project
 name: workflows
-prefect-version: 3.4.6
+prefect-version: 3.6.10
 
 # build section allows you to manage and build docker images
 build: null
