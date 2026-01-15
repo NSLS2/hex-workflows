@@ -1,9 +1,9 @@
-FROM ghcr.io/prefix-dev/pixi:latest
+FROM ghcr.io/prefix-dev/pixi:0.57.0
 
 ENV TZ="America/New_York"
 
 RUN apt-get -y update && \
-    apt-get -y install git
+    apt-get -y install git tzdata
 
 COPY pixi.toml .
 COPY pixi.lock .
@@ -14,7 +14,7 @@ RUN pixi shell-hook -s bash > /shell-hook
 
 ENV PYTHONUNBUFFERED=1
 
-COPY test.py .
+COPY default.py .
 
 RUN mkdir /etc/tiled
 RUN mkdir /.prefect -m 0777
@@ -24,4 +24,4 @@ RUN /bin/bash /shell-hook
 
 #now reapply deployment to push the image that is being created
 ENTRYPOINT ["pixi", "run"]
-CMD ["python", "-m", "test", "arg"]
+CMD ["python", "-m", "default", "arg"]

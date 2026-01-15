@@ -4,9 +4,10 @@ name = "prefect3 test"
 platforms = ["linux-64"]
 
 [dependencies]
-bluesky-tiled-plugins = ">=2.0.0b69"
-prefect = "==3.4.6"
-tiled-client = ">=0.1.6"
+bluesky-tiled-plugins = ">=2"
+prefect = ">=3.4.6"
+python = "<3.14"
+tiled-client = ">=0.2.3"
 prefect-docker = "*"
 h5py = "*"
 numpy = "*"
