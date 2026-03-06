@@ -4,7 +4,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 import tiled
-from prefect import flow, task
+from prefect import flow, task, get_run_logger
 from prefect.blocks.system import Secret
 from tiled.client.utils import get_asset_filepaths
 from end_of_run_workflow import get_run
@@ -152,8 +152,13 @@ def create_edxd_nxs_file(run, det_name):
 
 
 @flow(log_prints=True)
-def export_edxd_flow(ref, api_key=api_key):
+def export_edxd_flow(ref, api_key=api_key, dry_run=dry_run):
+    logger = get_run_logger()
     print(f"tiled: {tiled.__version__}")
-    run = get_run(ref, api_key=api_key)
-    create_edxd_nxs_file(run, det_name="germ")
+    if dry_run:
+        logger.info("Dry run: skipping writing EDXD NXS file")
+    else:
+        logger.info("Creating EDXD NXS file")
+        run = get_run(ref, api_key=api_key)
+        create_edxd_nxs_file(run, det_name="germ")
     print("Done!")

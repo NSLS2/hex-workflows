@@ -35,7 +35,7 @@ def log_completion():
 
 
 @flow(log_prints=True)
-def end_of_run_workflow(stop_doc):
+def end_of_run_workflow(stop_doc, dry_run=None):
     uid = stop_doc["run_start"]
     print(f"{uid = }")
     api_key = get_api_key_from_env(api_key=None)
@@ -49,15 +49,15 @@ def end_of_run_workflow(stop_doc):
 
         if scan_type in ["tomo_dark_flat", "tomo_flyscan"]:
             print("Running export_tomo_flow")
-            export_tomo_flow(uid, api_key=api_key)
+            export_tomo_flow(uid, api_key=api_key, dry_run=dry_run)
         elif scan_type == "edxd":
             print("Running export_edxd_flow")
-            export_edxd_flow(uid, api_key=api_key)
+            export_edxd_flow(uid, api_key=api_key, dry_run=dry_run)
         else:
             print("Unknown tomo scanning mode. Not exporting.")
 
         # Disabling until validation fixed
-        # data_validation(uid)
+        # data_validation(uid, dry_run=dry_run)
         log_completion()
     else:
         print(f"Not running flow. {exit_status = }")

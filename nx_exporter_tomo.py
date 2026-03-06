@@ -269,8 +269,12 @@ def export_dark_flat(run, export_dir=None):
 
 
 @flow(log_prints=True)
-def export_tomo_flow(ref, api_key=None):
+def export_tomo_flow(ref, api_key=None, dry_run=dry_run):
+    logger = get_run_logger()
     uid = ref
+    if dry_run:
+        logger.info(f"Dry run: not exporting. tomo_scanning_mode={run.start.get('tomo_scanning_mode')}")
+        return
     run = get_run(uid, api_key=api_key)
 
     if run.start.get("tomo_scanning_mode") == "tomo_dark_flat":
