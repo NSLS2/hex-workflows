@@ -5,8 +5,9 @@ import h5py
 import numpy as np
 from prefect import flow, get_run_logger, task
 from prefect.blocks.system import Secret
-from tiled.client import from_profile, from_uri
+#from tiled.client import from_uri
 from tiled.client.utils import get_asset_filepaths
+from data_validation import get_run
 
 
 def get_filepath_from_run_tomo(run, stream_name):
@@ -268,16 +269,9 @@ def export_dark_flat(run, export_dir=None):
 
 
 @flow(log_prints=True)
-def export_tomo_flow(ref):
+def export_tomo_flow(ref, api_key=None):
     uid = ref
-    #tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
-    #if tiled_server_type == "facility":
-    api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
-    tiled_client = from_profile("nsls2", api_key=api_key)
-    run = tiled_client["hex"]["raw"][uid]
-    #elif tiled_server_type == "local":
-    #    tiled_client = from_uri("http://localhost:8000")
-    #    run = tiled_client[uid]
+    run = get_run(uid, api_key=api_key)
 
     if run.start.get("tomo_scanning_mode") == "tomo_dark_flat":
         export_dark_flat(run)

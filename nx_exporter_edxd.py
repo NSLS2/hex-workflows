@@ -6,12 +6,8 @@ import numpy as np
 import tiled
 from prefect import flow, task
 from prefect.blocks.system import Secret
-from tiled.client import from_profile
 from tiled.client.utils import get_asset_filepaths
-
-api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
-tiled_client = from_profile("nsls2", api_key=api_key)["hex"]
-tiled_client_hex = tiled_client["raw"]
+from end_of_run_workflow import get_run
 
 GERM_DETECTOR_KEYS = [
     "count_time",
@@ -156,8 +152,8 @@ def create_edxd_nxs_file(run, det_name):
 
 
 @flow(log_prints=True)
-def export_edxd_flow(ref):
+def export_edxd_flow(ref, api_key=api_key):
     print(f"tiled: {tiled.__version__}")
-    run = tiled_client_hex[ref]
+    run = get_run(ref, api_key=api_key)
     create_edxd_nxs_file(run, det_name="germ")
     print("Done!")
