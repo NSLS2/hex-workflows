@@ -273,7 +273,7 @@ def export_tomo_flow(ref, api_key=None, dry_run=None):
     logger = get_run_logger()
     uid = ref
     if dry_run:
-        logger.info(f"Dry run: not exporting. tomo_scanning_mode={run.start.get('tomo_scanning_mode')}")
+        logger.info(f"Dry run: not getting client, not exporting")
         return
     run = get_run(uid, api_key=api_key)
 
