@@ -269,7 +269,7 @@ def export_dark_flat(run, export_dir=None):
 
 
 @flow(log_prints=True)
-def export_tomo_flow(ref, api_key=None, dry_run=dry_run):
+def export_tomo_flow(ref, api_key=None, dry_run=None):
     logger = get_run_logger()
     uid = ref
     if dry_run:

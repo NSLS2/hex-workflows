@@ -152,7 +152,7 @@ def create_edxd_nxs_file(run, det_name):
 
 
 @flow(log_prints=True)
-def export_edxd_flow(ref, api_key=api_key, dry_run=dry_run):
+def export_edxd_flow(ref, api_key=None, dry_run=None):
     logger = get_run_logger()
     print(f"tiled: {tiled.__version__}")
     if dry_run:

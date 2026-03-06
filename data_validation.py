@@ -26,7 +26,7 @@ def read_stream(run, stream):
 
 
 @flow
-def data_validation(uid, api_key=None, dry_run=dry_run):
+def data_validation(uid, api_key=None, dry_run=None):
     logger = get_run_logger()
     if dry_run:
         logger.info("Dry run: not creating Tiled client or checking streams")
