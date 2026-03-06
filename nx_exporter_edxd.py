@@ -4,14 +4,10 @@ from pathlib import Path
 import h5py
 import numpy as np
 import tiled
-from prefect import flow, task
+from prefect import flow, task, get_run_logger
 from prefect.blocks.system import Secret
-from tiled.client import from_profile
 from tiled.client.utils import get_asset_filepaths
-
-api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
-tiled_client = from_profile("nsls2", api_key=api_key)["hex"]
-tiled_client_hex = tiled_client["raw"]
+from data_validation import get_run
 
 GERM_DETECTOR_KEYS = [
     "count_time",
@@ -156,8 +152,13 @@ def create_edxd_nxs_file(run, det_name):
 
 
 @flow(log_prints=True)
-def export_edxd_flow(ref):
+def export_edxd_flow(ref, api_key=None, dry_run=None):
+    logger = get_run_logger()
     print(f"tiled: {tiled.__version__}")
-    run = tiled_client_hex[ref]
-    create_edxd_nxs_file(run, det_name="germ")
+    if dry_run:
+        logger.info("Dry run: skipping writing EDXD NXS file")
+    else:
+        logger.info("Creating EDXD NXS file")
+        run = get_run(ref, api_key=api_key)
+        create_edxd_nxs_file(run, det_name="germ")
     print("Done!")
