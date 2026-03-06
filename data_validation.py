@@ -2,7 +2,7 @@ import os
 import time as ttime
 
 from prefect import flow, get_run_logger, task
-from tiled.client import from_profile, from_uri
+from tiled.client import from_uri
 from end_of_run_workflow import get_run as get_run_eorw
 
 
