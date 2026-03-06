@@ -7,7 +7,7 @@ import tiled
 from prefect import flow, task, get_run_logger
 from prefect.blocks.system import Secret
 from tiled.client.utils import get_asset_filepaths
-from end_of_run_workflow import get_run
+from data_validation import get_run
 
 GERM_DETECTOR_KEYS = [
     "count_time",
