@@ -38,7 +38,7 @@ deployments:
         network: slirp4netns
         volumes:
           - /nsls2/data/hex/proposals:/nsls2/data/hex/proposals
-          - /srv/prefect3_docker_worker_hex/app:/srv
+          - /srv/prefect3-docker-worker-hex/app:/srv
         container_create_kwargs:
           userns_mode: "keep-id:uid=402973,gid=402973"  # workflow-hex:workflow-hex
         auto_remove: true
