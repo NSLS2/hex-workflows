@@ -23,7 +23,7 @@ pull:
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
   - name: hex-end-of-run-workflow-docker
-    version: 0.1.2
+    version: 0.1.3
     tags:
       - hex
       - main
@@ -33,14 +33,12 @@ deployments:
     work_pool:
       name: hex-work-pool-docker
       job_variables:
-        env:
-          TILED_SITE_PROFILES: /nsls2/software/etc/tiled/profiles
         image: ghcr.io/nsls2/hex-workflows:main
         image_pull_policy: Always
         network: slirp4netns
         volumes:
           - /nsls2/data/hex/proposals:/nsls2/data/hex/proposals
-          - /nsls2/software/etc/tiled:/nsls2/software/etc/tiled
+          - /srv/prefect3-docker-worker-hex/app:/srv
         container_create_kwargs:
           userns_mode: "keep-id:uid=402973,gid=402973"  # workflow-hex:workflow-hex
         auto_remove: true

@@ -5,8 +5,8 @@ import h5py
 import numpy as np
 from prefect import flow, get_run_logger, task
 from prefect.blocks.system import Secret
-from tiled.client import from_profile, from_uri
 from tiled.client.utils import get_asset_filepaths
+from data_validation import get_run
 
 
 def get_filepath_from_run_tomo(run, stream_name):
@@ -268,16 +268,13 @@ def export_dark_flat(run, export_dir=None):
 
 
 @flow(log_prints=True)
-def export_tomo_flow(ref):
+def export_tomo_flow(ref, api_key=None, dry_run=None):
+    logger = get_run_logger()
     uid = ref
-    #tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
-    #if tiled_server_type == "facility":
-    api_key = Secret.load("tiled-hex-api-key", _sync=True).get()
-    tiled_client = from_profile("nsls2", api_key=api_key)
-    run = tiled_client["hex"]["raw"][uid]
-    #elif tiled_server_type == "local":
-    #    tiled_client = from_uri("http://localhost:8000")
-    #    run = tiled_client[uid]
+    if dry_run:
+        logger.info(f"Dry run: not getting client, not exporting")
+        return
+    run = get_run(uid, api_key=api_key)
 
     if run.start.get("tomo_scanning_mode") == "tomo_dark_flat":
         export_dark_flat(run)
@@ -286,11 +283,7 @@ def export_tomo_flow(ref):
 
 
 # if __name__ == "__main__":
-#     tiled_client = from_uri(
-#         "http://localhost:8000",
-#         api_key=os.getenv("TILED_API_KEY", ""),
-#         include_data_sources=True,
-#     )
+#     run = get_run(uid)
 #
 #     # uid = "27d30985-ca8b-46c9-93fd-64ffa7e88ac2"
 #
@@ -301,8 +294,6 @@ def export_tomo_flow(ref):
 #     # Saved in proposals:
 #     # uid = "a1451ea2-55c5-4d45-a4c1-efc0872e4355"  # run on 2024-03-28 at ~8:10 pm, 180 deg scan, 1801 frames
 #     uid = "db2182bd-f6e9-41f4-ae3f-b4e8bd594eb0"  # run on 2024-03-29 at ~8:00 am, 360 deg scan, 3601 frames
-#
-#     run = tiled_client[uid]
 #
 #     nx_filepath = export_tomo(run, export_dir=None, file_prefix=None, counter=0)
 #     print(f"{nx_filepath = }")
