@@ -8,15 +8,8 @@ from tiled.client import from_uri
 @task
 def get_run(uid, api_key=None):
     logger = get_run_logger()
-    tiled_server_type = os.environ.get("TILED_SERVER_TYPE")
-    if tiled_server_type == "facility" or not tiled_server_type:
-        tiled_client = from_uri("https://tiled.nsls2.bnl.gov", api_key=api_key)
-        run = tiled_client["hex"]["raw"][uid]
-    elif tiled_server_type == "local":
-        tiled_client = from_uri("http://localhost:8000")
-        run = tiled_client[uid]
-    else:
-        raise Exception(f"Unknown Tiled server type: {tiled_server_type}")
+    tiled_client = from_uri("https://tiled.nsls2.bnl.gov", api_key=api_key)
+    run = tiled_client["hex"]["raw"][uid]
     return run
 
 

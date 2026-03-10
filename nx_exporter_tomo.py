@@ -5,7 +5,6 @@ import h5py
 import numpy as np
 from prefect import flow, get_run_logger, task
 from prefect.blocks.system import Secret
-#from tiled.client import from_uri
 from tiled.client.utils import get_asset_filepaths
 from data_validation import get_run
 
@@ -284,11 +283,7 @@ def export_tomo_flow(ref, api_key=None, dry_run=None):
 
 
 # if __name__ == "__main__":
-#     tiled_client = from_uri(
-#         "http://localhost:8000",
-#         api_key=os.getenv("TILED_API_KEY", ""),
-#         include_data_sources=True,
-#     )
+#     run = get_run(uid)
 #
 #     # uid = "27d30985-ca8b-46c9-93fd-64ffa7e88ac2"
 #
@@ -299,8 +294,6 @@ def export_tomo_flow(ref, api_key=None, dry_run=None):
 #     # Saved in proposals:
 #     # uid = "a1451ea2-55c5-4d45-a4c1-efc0872e4355"  # run on 2024-03-28 at ~8:10 pm, 180 deg scan, 1801 frames
 #     uid = "db2182bd-f6e9-41f4-ae3f-b4e8bd594eb0"  # run on 2024-03-29 at ~8:00 am, 360 deg scan, 3601 frames
-#
-#     run = tiled_client[uid]
 #
 #     nx_filepath = export_tomo(run, export_dir=None, file_prefix=None, counter=0)
 #     print(f"{nx_filepath = }")
