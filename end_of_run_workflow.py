@@ -10,14 +10,13 @@ from dotenv import load_dotenv
 
 def get_api_key_from_env(api_key=None):
     logger = get_run_logger()
-    if not api_key:
-        try:
-            with open("/srv/container.secret", "r") as secrets:
-                load_dotenv(stream=secrets)
-        except Exception:
-            logger.exception("Exception while getting Tiled API key")
-        finally:
-            api_key = os.environ["TILED_API_KEY"]
+    try:
+        with open("/srv/container.secret", "r") as secrets:
+            load_dotenv(stream=secrets)
+    except Exception:
+        logger.exception("Exception while getting Tiled API key")
+    finally:
+        api_key = os.environ["TILED_API_KEY"]
     return api_key
 
 
