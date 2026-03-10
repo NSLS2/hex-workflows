@@ -10,13 +10,9 @@ from dotenv import load_dotenv
 
 def get_api_key_from_env(api_key=None):
     logger = get_run_logger()
-    try:
-        with open("/srv/container.secret", "r") as secrets:
-            load_dotenv(stream=secrets)
-    except Exception:
-        logger.exception("Exception while getting Tiled API key")
-    finally:
-        api_key = os.environ["TILED_API_KEY"]
+    with open("/srv/container.secret", "r") as secrets:
+        load_dotenv(stream=secrets)
+    api_key = os.environ["TILED_API_KEY"]
     return api_key
 
 
@@ -57,7 +53,7 @@ def end_of_run_workflow(stop_doc, api_key=None, dry_run=None):
             print("Unknown tomo scanning mode. Not exporting.")
 
         # Disabling until validation fixed
-        # data_validation(uid, dry_run=dry_run)
+        # data_validation(uid)
         log_completion()
     else:
         print(f"Not running flow. {exit_status = }")
