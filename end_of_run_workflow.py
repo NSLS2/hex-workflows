@@ -67,7 +67,7 @@ def slack(func):
             flow_run = FlowRunContext.get().flow_run
             # Add link to flow-run for the message to mon-prefect-hxm.
             program_message = (
-                f":bangbang: {CATALOG_NAME} flow-run failed. <https://{PREFECT_UI_URL.value()}/flow-runs/"
+                f":bangbang: {CATALOG_NAME} flow-run failed. <{PREFECT_UI_URL.value()}/flow-runs/"
                 + f"flow-run/{flow_run.id}|the flow run link> (*{flow_run_name}*)\n ```run_start: {uid}\nscan_id: {scan_id}``` ```{tb[-1]}```"
             )
             mon_prefect_hxm.notify(program_message)
