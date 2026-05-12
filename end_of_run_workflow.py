@@ -81,6 +81,7 @@ def log_completion():
 
 
 @flow(log_prints=True)
+@slack
 def end_of_run_workflow(stop_doc, api_key=None, dry_run=None):
     uid = stop_doc["run_start"]
     print(f"{uid = }")
