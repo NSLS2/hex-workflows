@@ -69,12 +69,7 @@ def export_tomo(run, export_dir=None):
         if "tomo" in stream:
             filepaths = get_filepath_from_run_tomo(run, stream)
             for det, filepath in filepaths.items():
-                if "Angle" in det:
-                    panda_filepath = filepath
-                    # Check that panda file exists
-                    if not os.path.exists(panda_filepath):
-                        raise FileNotFoundError(f"{panda_filepath} does not exist")
-                elif "kinetix" in det:
+                if "kinetix" in det:
                     det_filepath = filepath
                     det_filepaths[det] = det_filepath
                     # Check that det files exist
@@ -138,10 +133,18 @@ def export_tomo(run, export_dir=None):
                     det_filepath.as_posix(),
                     "entry/data/data",
                 )
-        data_grp["rotation_angle"] = h5py.ExternalLink(
-            rel_panda_filepath.as_posix(),
-            "Angle",
-        )
+        if tomo in run["streams"]:
+            angles = run["tomo"]["Angle"]
+            if angles.ndim == 1:
+                data_grp["rotation_angle"] = angles
+            elif angles.ndim == 2:  # https://stackoverflow.com/questions/15956309/averaging-over-every-n-elements-of-a-numpy-array
+                averaging_images, total_images = angles.shape
+                pad_size = (averaging_images - total_images % averaging_images) % averaging_images
+                padded_arr = np.append(arr, np.full(pad_size, np.nan))
+                averages = np.nanmean(padded_arr.reshape(-1, averaging_images), axis=1)
+                data_grp["rotation_angle"] = averages
+            else:
+                raise Exception("Unexpected number of dimensions for angles")
 
         # data = run.primary["data"][f"{det_name}_image"].read()
         # frame_shape = data.shape[1:]
