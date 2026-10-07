@@ -69,7 +69,12 @@ def export_tomo(run, export_dir=None):
         if "tomo" in stream:
             filepaths = get_filepath_from_run_tomo(run, stream)
             for det, filepath in filepaths.items():
-                if "kinetix" in det:
+                 if "Angle" in det:
+                     panda_filepath = filepath
+                     # Check that panda file exists
+                     if not os.path.exists(panda_filepath):
+                         raise FileNotFoundError(f"{panda_filepath} does not exist")
+                 elif "kinetix" in det:                if "kinetix" in det:
                     det_filepath = filepath
                     det_filepaths[det] = det_filepath
                     # Check that det files exist
