@@ -79,7 +79,8 @@ def export_tomo(run, export_dir=None):
             pass
 
     # det_filepath = get_filepath_from_run(run, "kinetix-det1_stream")
-    print(f"{det_filepaths = !r}")
+    # panda_filepath = get_filepath_from_run(run, "panda1_stream")
+    print(f"{det_filepaths = !r}\n{panda_filepath = !r}")
 
     if export_dir is None:
         export_dir = f"/nsls2/data/hex/proposals/{start_doc['cycle']}/{start_doc['data_session']}/tomography/metadata/scan_{start_doc['scan_id']:05d}/"
@@ -90,10 +91,12 @@ def export_tomo(run, export_dir=None):
     common_parent_dir = os.path.commonprefix([export_dir, panda_filepath])
     print(f"{common_parent_dir = }")
 
+    rel_panda_filepath = Path(f"../../../{Path(panda_filepath).relative_to(common_parent_dir)}")
     rel_det_filepaths = {}
     for stream_name, det_filepath in det_filepaths.items():
         rel_det_filepaths[stream_name] = Path(f"../../../{Path(det_filepath).relative_to(common_parent_dir)}")
 
+    print(f"{rel_panda_filepath = }")
     print(f"{rel_det_filepaths = }")
 
     filename = f"scan_{start_doc['scan_id']:05d}.nxs"
