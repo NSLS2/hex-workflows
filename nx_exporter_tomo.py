@@ -144,8 +144,8 @@ def export_tomo(run, export_dir=None):
         elif angles.ndim == 2:  # https://stackoverflow.com/questions/15956309/averaging-over-every-n-elements-of-a-numpy-array
             averaging_images, total_images = angles.shape
             pad_size = (averaging_images - total_images % averaging_images) % averaging_images
-            padded_arr = np.append(arr, np.full(pad_size, np.nan))
-            averages = np.nanmean(padded_arr.reshape(-1, averaging_images), axis=1)
+            padded_angles = np.append(angles[1], np.full(pad_size, np.nan))
+            averages = np.nanmean(padded_angles.reshape(-1, averaging_images), axis=1)
             data_grp["rotation_angle"] = averages
         else:
             raise Exception("Unexpected number of dimensions for angles")
