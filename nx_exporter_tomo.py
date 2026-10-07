@@ -74,7 +74,7 @@ def export_tomo(run, export_dir=None):
                      # Check that panda file exists
                      if not os.path.exists(panda_filepath):
                          raise FileNotFoundError(f"{panda_filepath} does not exist")
-                 elif "kinetix" in det:                if "kinetix" in det:
+                 elif "kinetix" in det:
                     det_filepath = filepath
                     det_filepaths[det] = det_filepath
                     # Check that det files exist
