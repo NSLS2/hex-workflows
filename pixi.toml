@@ -1,4 +1,5 @@
 [workspace]
+requires-pixi = ">=0.82.1"
 channels = ["conda-forge"]
 name = "prefect3 test"
 platforms = ["linux-64"]
